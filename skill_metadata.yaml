@@ -1,0 +1,93 @@
+# ============================================================
+# RAG Skill 元数据定义
+# Skill 名称: FinancialRegulationQA
+# 用途: 金融法规知识问答
+# 遵循三层结构: 元数据 → 指令 → 完整资源
+# ============================================================
+
+skill:
+  name: "FinancialRegulationQA"                # 技能唯一标识
+  display_name: "金融法规问答助手"              # 前端显示名称
+  version: "1.0.0"                             # 语义版本号
+  author: "自动化测试工程师转型项目组"         # 作者或团队
+  created: "2026-05-16"                        # 创建日期
+  description: >
+    基于 RAG 架构的金融法规知识问答技能，可回答中国银行业监管政策、
+    资本充足率、LPR、个人外汇管理等问题。触发词激活后按需加载向量库和检索链。
+
+  # ---------- 触发词配置 ----------
+  trigger:
+    type: "keyword"                            # 触发方式：关键词匹配
+    keywords:                                  # 触发词列表（中英文均可）
+      - "资本充足率"
+      - "LPR"
+      - "贷款市场报价利率"
+      - "购汇"
+      - "外汇额度"
+      - "个人外汇"
+      - "金融法规"
+      - "监管要求"
+      - "资本管理办法"
+      - "存款准备金"
+    case_sensitive: false                      # 忽略大小写
+    match_mode: "partial"                      # 部分匹配（触发词出现在用户输入中即激活）
+
+  # ---------- 依赖库与运行环境 ----------
+  dependencies:
+    python: ">=3.10"
+    packages:
+      - name: "langchain"
+        version: "1.2.18"
+      - name: "langchain-core"
+        version: "1.2.27"
+      - name: "langchain-classic"
+        version: "latest"
+      - name: "langchain-openai"
+        version: "latest"
+      - name: "langchain-community"
+        version: "latest"
+      - name: "langchain-text-splitters"
+        version: "latest"
+      - name: "langchain-chroma"
+        version: "latest"
+      - name: "chromadb"
+        version: "latest"
+      - name: "sentence-transformers"
+        version: "latest"
+    model:
+      llm:
+        provider: "qwen"
+        model: "qwen-turbo"           # 或 qwen-plus / qwen-max，按实际选择
+        temperature: 0
+        max_tokens: 512
+      embedding:
+        model: "text2vec-base-chinese"  # 适合中文金融文本
+        provider: "local"
+    vectorstore: "chroma"                      # 向量数据库
+    storage_path: "./chroma_db"                # 持久化路径
+
+  # ---------- 性能基线 ----------
+  performance_baseline:
+    retrieval_latency_p95_ms: 800              # 检索 P95 延迟（毫秒）
+    generation_latency_p95_ms: 1200            # 生成 P95 延迟
+    total_latency_p95_ms: 2000                 # 端到端 P95 延迟
+    recall_at_2: 0.95                          # Recall@2 目标
+    faithfulness_score: 0.9                    # 忠实度最低得分
+
+  # ---------- 评测集 ----------
+  evaluation:
+    dataset_version: "0.1"                     # 关联的评测数据集版本
+    dataset_path: "evaluation/finance_eval_set.yaml"
+    min_pass_rate: 0.9                         # 最低通过率（在种子数据集上）
+
+  # ---------- 行为标记 ----------
+  behavior:
+    refusal_on_out_of_scope: true              # 超出知识库时是否拒绝回答
+    refusal_on_adversarial: true               # 检测到对抗输入时是否拒绝
+    max_context_length: 3000                   # 注入上下文最大 token 数
+    response_language: "zh-CN"                 # 回答语言
+
+  # ---------- 扩展信息（可选）----------
+  extra:
+    tags: ["金融", "法规", "RAG", "问答"]
+    changelog: "V1.0.0 初始版本，覆盖银行业基础监管政策。"

@@ -1,0 +1,135 @@
+# data/source_docs/index.yaml
+# 金融法规知识库 - 源文档索引
+# 更新日期：2026-05-20
+
+documents:
+  - id: "doc_001"
+    filename: "capital_management_measures_2024.txt"
+    title: "商业银行资本管理办法"
+    issuing_body: "国家金融监督管理总局"
+    document_number: "国家金融监督管理总局令2023年第4号"
+    effective_date: "2024-01-01"
+    source_url: "https://www.124.gov.cn/fzzx/202311/t4660501.shtml"
+    source_type: "官方全文"
+    status: "现行有效"
+    topics:
+      - "资本充足率"
+      - "资本监管指标"
+      - "风险加权资产"
+      - "差异化监管体系"
+      - "杠杆率"
+    key_provisions:
+      - "资本充足率定义与计算（第5条）"
+      - "核心一级资本充足率/一级资本充足率/资本充足率"
+      - "三档差异化监管标准（第6条）"
+      - "风险加权资产计量规则（附件1-25）"
+
+  - id: "doc_002"
+    filename: "personal_forex_measures_2007.txt"
+    title: "个人外汇管理办法"
+    issuing_body: "中国人民银行"
+    document_number: "中国人民银行令〔2006〕第3号"
+    effective_date: "2007-02-01"
+    source_url: "http://www.fusiontax.cn/index.php?title=中国人民银行个人外汇管理办法"
+    source_type: "法规库全文"
+    status: "现行有效"
+    topics:
+      - "个人外汇业务分类"
+      - "经常项目外汇管理"
+      - "资本项目外汇管理"
+      - "个人外汇账户管理"
+    key_provisions:
+      - "个人外汇业务按交易主体和交易性质分类管理（第2条）"
+      - "经常项目按可兑换原则管理（第3条）"
+      - "外汇局对个人外汇业务监督管理（第4条）"
+
+  - id: "doc_003"
+    filename: "personal_forex_implementation_rules_2007.txt"
+    title: "个人外汇管理办法实施细则"
+    issuing_body: "国家外汇管理局"
+    document_number: "汇发〔2007〕1号"
+    effective_date: "2007-02-01"
+    source_url: "https://www.safe.gov.cn/hebei/2015/0514/422.html"
+    source_type: "官方全文"
+    status: "现行有效"
+    topics:
+      - "个人年度购汇/结汇额度"
+      - "经常项目个人外汇管理细则"
+      - "个人外汇账户及外币现钞管理"
+      - "个人结售汇管理信息系统"
+    key_provisions:
+      - "年度总额管理：每人每年等值5万美元（第2条）"
+      - "超额度经常项目非经营性结汇规定（第10条）"
+      - "个人外汇账户开立与管理"
+
+  - id: "doc_004"
+    filename: "deposit_insurance_regulation_2015.txt"
+    title: "存款保险条例"
+    issuing_body: "中华人民共和国国务院"
+    document_number: "国务院令第660号"
+    effective_date: "2015-05-01"
+    source_url: "http://xzfg.moj.gov.cn/front/law/detail?LawID=419"
+    source_type: "行政法规库官方全文"
+    status: "现行有效"
+    topics:
+      - "存款保险制度"
+      - "最高偿付限额"
+      - "投保机构范围"
+      - "存款保险基金"
+      - "差别费率"
+    key_provisions:
+      - "最高偿付限额50万元人民币（第5条）"
+      - "投保机构范围：商业银行、农村合作银行、农村信用社等（第2条）"
+      - "被保险存款包括人民币存款和外币存款（第4条）"
+      - "存款保险基金来源与运用（第6-11条）"
+
+  - id: "doc_005"
+    filename: "lpr_formation_mechanism_2026.md"
+    title: "LPR贷款市场报价利率形成机制"
+    issuing_body: "中国人民银行（授权全国银行间同业拆借中心发布）"
+    document_number: "中国人民银行公告〔2019〕15号"
+    effective_date: "2019-08-20（LPR改革后首次发布）"
+    source_url: "https://www.163.com/dy/article/KTC4BEH50530NLC9.html"
+    source_type: "官方授权发布+新闻报道综合整理"
+    status: "持续更新（每月20日发布）"
+    topics:
+      - "LPR形成机制"
+      - "LPR报价行名单"
+      - "LPR与房贷利率关系"
+      - "LPR历史走势"
+    key_provisions:
+      - "由各报价行按公开市场操作利率（7天期逆回购利率）加点形成报价"
+      - "全国银行间同业拆借中心按去掉最高和最低报价后算术平均计算"
+      - "20家报价行名单"
+      - "2026年5月20日：1年期3.0%，5年期以上3.5%"
+
+  - id: "doc_006"
+    filename: "anti_money_laundering_law_2025.txt"
+    title: "中华人民共和国反洗钱法（2024年修订）"
+    issuing_body: "全国人民代表大会常务委员会"
+    document_number: "第十四届全国人大常委会第十二次会议修订"
+    effective_date: "2025-01-01"
+    source_url: "https://camlmac.pbc.gov.cn/fxqzhongxin/3558093/3558113/5586756/index.html"
+    source_type: "央行反洗钱中心官方全文"
+    status: "现行有效"
+    topics:
+      - "反洗钱监督管理"
+      - "金融机构反洗钱义务"
+      - "大额交易和可疑交易报告"
+      - "反洗钱调查"
+      - "法律责任"
+    key_provisions:
+      - "反洗钱定义：预防掩饰、隐瞒七类上游犯罪所得（第2条）"
+      - "金融机构应建立反洗钱内部控制制度（第6条）"
+      - "客户尽职调查、身份资料和交易记录保存（第6条）"
+      - "反洗钱信息保密义务（第7条）"
+
+summary:
+  total_documents: 6
+  coverage_topics:
+    - "银行资本监管"
+    - "个人外汇管理"
+    - "存款保险保障"
+    - "贷款市场报价利率"
+    - "反洗钱合规"
+  last_updated: "2026-05-20"

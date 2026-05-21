@@ -1,0 +1,72 @@
+# Python 缓存与编译文件
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# 虚拟环境
+venv/
+.venv/
+env/
+
+# IDE 及编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 密钥与环境变量（务必不要提交！）
+.env
+*.env
+!env.example
+DASHSCOPE_API_KEY
+OPENAI_API_KEY
+
+# 向量库持久化数据（体积大，团队间通过脚本重建）
+chroma_db/
+
+# 原始文档与生成的数据集（若体积很大可忽略；小文本可保留）
+data/source_docs/*.pdf
+data/source_docs/*.docx
+data/test_docs/
+data/candidate_qa.yaml
+data/flagged_qa.yaml
+data/rewrite_list.yaml
+
+# 但保留目录结构和索引、人工校验后的最终数据集
+!data/source_docs/index.yaml
+!data/final_qa_dataset.yaml
+!data/reviewed_qa.yaml
+!data/eval_dataset*.yaml
+!data/holdout_dataset.yaml
+
+# 评测报告与基线（生成物，每次运行会重新生成）
+eval_report.json
+eval_baseline.json
+
+# Jupyter Notebook 检查点
+.ipynb_checkpoints/
+
+# DeepEval 缓存或临时文件
+.deepeval/
+
+# Docker 相关（如不需要可保留）
+# docker-compose.override.yml
+
+# 本地模型文件（sentence-transformers 默认缓存路径）
+models1/
+models/
+all-MiniLM-L6-v2/
+*.bin
+*.safetensors
+
+# Hugging Face 缓存（如果模型下载到了默认位置 ~/.cache/huggingface）
+# 但通常不在项目内，如果在项目内则加上：
+.huggingface/
+huggingface/

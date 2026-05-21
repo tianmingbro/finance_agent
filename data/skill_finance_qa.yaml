@@ -1,0 +1,72 @@
+# ============================================================
+# 金融法规问答 RAG Skill - 三层结构定义
+# 版本: 1.0.0
+# 日期: 2026-05-16
+# ============================================================
+
+skill:
+  # ---------- 第一层：元数据 ----------
+  metadata:
+    name: "FinancialRegulationQA"
+    version: "1.0.0"
+    description: "回答中国银行业监管政策与金融法规问题"
+    author: "AI转型训练营"
+    tags: ["金融", "法规", "问答"]
+    trigger_keywords:
+      - "资本充足率"
+      - "LPR"
+      - "购汇额度"
+      - "贷款市场报价利率"
+      - "金融法规"
+      - "监管要求"
+      - "个人外汇"
+      - "商业银行"
+    dependencies:
+      python: ">=3.10"
+      packages:
+        - "langchain>=1.2.18"
+        - "langchain-core>=1.2.27"
+        - "langchain-openai"
+        - "langchain-community"
+        - "langchain-text-splitters"
+        - "langchain-chroma"
+        - "chromadb"
+        - "sentence-transformers"
+    performance_baseline:
+      p95_latency_ms: 2000
+      recall_at_2: 1.0
+
+  # ---------- 第二层：指令 ----------
+  instruction:
+    system_prompt: |
+      你是一个专业的金融法规咨询助手。
+      使用以下检索到的上下文来回答问题。
+      如果上下文中找不到答案，请诚实地说'该信息未在已知法规中收录'。
+      回答请保持简洁、专业，不超过三句话。
+    context_placeholder: "{context}"
+    input_placeholder: "{input}"
+    refusal_message: "该信息未在已知法规中收录。"
+
+  # ---------- 第三层：完整资源 ----------
+  resources:
+    data_source:
+      type: "text_file"
+      path: "data/finance_qa.txt"
+    chunking:
+      strategy: "RecursiveCharacterTextSplitter"
+      chunk_size: 300
+      chunk_overlap: 50
+    embedding:
+      model_name: "sentence-transformers/all-MiniLM-L6-v2"
+      device: "cpu"
+      normalize: true
+    vectorstore:
+      type: "Chroma"
+      persist_directory: "./chroma_db"
+      collection_name: "finance_qa"
+      search_kwargs:
+        k: 2
+    llm:
+      provider: "openai"
+      model: "gpt-4o-mini"
+      temperature: 0

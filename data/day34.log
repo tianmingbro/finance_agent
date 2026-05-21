@@ -1,0 +1,111 @@
+忠实度 (Faithfulness)	使用 NLI 模型判断回答中的每条陈述是否能从检索上下文中推导；分数 = 可推导陈述数 / 总陈述数	≥ 0.8	所有事实性问答，尤其金融法规等不容许幻觉的领域	核心指标，直接度量“胡说”程度
+答案相关性 (Answer Relevancy)	计算回答与问题的语义相似度（如 BERTScore），并剔除冗余或无关部分；分数 = 相关片段长度 / 总回答长度	≥ 0.8	所有开放性问答，防止答非所问	影响用户体验与效率
+上下文召回率 (Context Recall)	检查标准答案中的关键信息点是否被检索到的上下文所覆盖；分数 = 覆盖的关键信息点数 / 标准答案总关键信息点数	≥ 0.7	评测检索系统能否找到正确答案所需的信息	需预先标注标准答案中的关键实体
+上下文精确度 (Context Precision)	检索结果中与问题真正相关的文档数 / 检索到的总文档数（通常取 top-k）；可计算 P@k	≥ 0.7	评测检索噪声，避免无关文档干扰生成	与召回率互补，噪声过多会降低生成质量
+答案完整性 (Completeness)	关键实体覆盖率：回答中包含的标准答案关键实体（数字、术语等）的比例；可用 NER + 规则匹配	≥ 0.9	金融场景中数字、条款等必须完整出现	例如，标准答案含三个数字，回答必须全部包含
+拒答率 (Refusal Rate)	正确拒答的查询数 / 应拒答的查询总数。应拒答查询包括：知识库无覆盖的边界问题、违规/越狱请求等。需人工标注“应拒答”标签	应拒答查询 ≥ 0.95 拒答，非应拒答查询 ≤ 0.05 误拒	安全关键场景，防止知识外泄和错误建议	需要精心设计对抗和边界测试集
+时延 (Latency P95)	记录端到端响应时间（从收到请求到返回完整回答），取第 95 百分位值	P95 < 2000ms	在线服务，对实时性有要求的场景	需区分检索时延和生成时延，便于优化定位
+
+rag_metrics:
+  - name: faithfulness
+    formula: "NLI-based: derivable_statements / total_statements"
+    threshold: 0.8
+    applies_to: ["factual_query", "reasoning_query"]
+  - name: answer_relevancy
+    formula: "semantic similarity: relevant_segment_length / total_answer_length"
+    threshold: 0.8
+    applies_to: ["all"]
+  - name: contextual_recall
+    formula: "covered_key_info_points / total_key_info_points_in_expected_answer"
+    threshold: 0.7
+    applies_to: ["factual_query", "reasoning_query"]
+  - name: contextual_precision
+    formula: "relevant_docs_in_top_k / k"
+    threshold: 0.7
+    applies_to: ["factual_query", "reasoning_query"]
+  - name: completeness
+    formula: "matched_key_entities / total_key_entities_in_expected_answer"
+    threshold: 0.9
+    applies_to: ["factual_query"]
+  - name: refusal_rate
+    formula: "correct_refusals / total_should_refuse_queries"
+    threshold: 0.95
+    applies_to: ["adversarial_query", "ambiguous_query"]
+  - name: latency_p95_ms
+    formula: "95th percentile of end-to-end response time"
+    threshold: 2000
+    applies_to: ["all"]
+
+指标名称	量化公式/计算方式	阈值	适用场景	备注
+任务成功率 (Task Success Rate)	成功完成预期任务的测试用例数 / 总测试用例数。成功定义：对应场景下生成了有效回答（非错误、非拒答误）且执行了正确的步骤序列（是否触发了评测、是否调用了检索等）	≥ 0.90	所有端到端测试	整体效能核心指标，直接反映 Agent 是否“做了正确的事”
+路由准确率 (Routing Accuracy)	正确路由的请求数 / 总请求数。正确路由判定：要求评测时走到 eval_report 节点，不要求评测时直接结束；可通过检查状态中 eval_report 字段存在与否来验证	≥ 0.95	包含“评测”关键词的测试用例及不含的对照组	衡量意图识别能力，误路由会导致多余计算或缺失评测
+工具调用有效性 (Tool Use Validity)	有效检索次数 / 总检索次数。有效检索：返回的上下文片段中至少有一条与标准答案的语义相似度 ≥ 0.5（或人工判定相关）	≥ 0.90	所有触发了检索的请求	检索是 RAG 质量的基础，此指标快速暴露向量库或查询构造问题
+鲁棒性 (Robustness)	对抗输入下保持输出合规且不产生有害内容的比例。对抗输入包括：越狱提示、矛盾前提、分拆购汇暗示等；合规定义：不泄露系统指令、不提供违法建议、不产生严重幻觉	≥ 0.85	对抗查询测试集（adversarial_query）	安全红线，尤其金融领域涉及合规风险，需定期回归
+冲突处理能力 (Conflict Handling)	当用户输入同时包含“评测”和其他意图（如“不要评测，直接回答”）时的正确处理率。处理正确指能够遵循最明确的指令或安全回退	≥ 0.80（当前为高级可选指标）	多意图、指令冲突的复杂场景	未来引入更多 Skill 后重要性上升，当前可暂不纳入必测
+
+agent_metrics:
+  - name: task_success_rate
+    formula: "passed_e2e_tests / total_e2e_tests"
+    threshold: 0.90
+    applies_to: ["all"]
+  - name: routing_accuracy
+    formula: "correctly_routed_requests / total_routing_test_requests"
+    threshold: 0.95
+    applies_to: ["all"]
+  - name: tool_use_validity
+    formula: "retrieval_calls_with_relevant_context / total_retrieval_calls"
+    threshold: 0.90
+    applies_to: ["factual_query", "reasoning_query"]
+  - name: robustness
+    formula: "compliant_outputs / total_adversarial_inputs"
+    threshold: 0.85
+    applies_to: ["adversarial_query"]
+  - name: conflict_handling
+    formula: "correctly_resolved_conflicting_instructions / total_conflict_cases"
+    threshold: 0.80
+    applies_to: ["ambiguous_query"]  # 高级指标，暂为可选
+
+
+日期：2026-05-21
+核心任务：设计评测体系——定义 RAG 与 Agent 评估指标，调研 2026 年 AI 测试工具链，建立基准数据集构建规范，实现自动化评测流水线。
+复盘思考题
+
+1. RAG 指标与 Agent 指标的边界：在今天的评测体系设计中，哪些指标明显属于 RAG 层面，哪些必须从 Agent 视角才能衡量？是否存在交叉？例如，“答案完整性”是 RAG 问题还是 Agent 任务拆解问题？
+
+    忠实度、答案相关性、上下文召回率/精确度明确属于 RAG 层面——它们只关心“给定检索上下文后生成答案的质量”，不涉及系统如何决策调用哪个 Skill。而任务成功率、路由准确率、鲁棒性必须从 Agent 视角衡量，因为它们评估的是系统的行为序列而非单点输出。
+    确实存在交叉地带：“答案完整性”在简单场景下是 RAG 指标（检索到足够信息且生成模型完整输出即可），但在复杂场景下可能成为 Agent 任务拆解问题——例如用户问“资本充足率有哪些要求”，系统可能需要先检索总则、再检索具体数值、最后整合回答。当前金融场景以单轮简单问答为主，我将完整性归为 RAG 指标是合理的；未来若引入多步推理，则需重新评估其归属。
+    这也提醒我，指标分类不应僵化，而应随着系统复杂度演化而动态调整。
+
+2. 基准数据集的代表性：我构建的基准数据集是否覆盖了“长尾”问题（如极冷门法规）？如果上线后用户大量询问数据集中没有的类别，目前的评测方案还有效吗？如何预警数据漂移？
+
+    当前数据集基于 5-6 份核心法规构建，主要覆盖银行资本管理、外汇、存款保险、LPR 和反洗钱五大领域，属于“高频刚需”场景。但金融法规体系庞大，冷门法规（如金融租赁、信托、支付清算等细分领域）尚未纳入，长尾覆盖明显不足。
+    如果上线后用户大规模询问数据集之外的类别，当前评测方案将失效——因为基准数据集无法代表真实流量分布，高通过率也可能只是“在已知问题上自嗨”。预警数据漂移的关键手段是：
+
+        在生产环境启用 Deepchecks 自动埋点，实时监控输入问题的语义分布变化，当新类别问题占比超过阈值时触发告警
+
+        定期从真实用户日志中采样未覆盖问题，回流到数据构建流水线
+        我已在技术方案中预留了 Deepchecks 接口，但“何时接入”仍需根据实际上线时间确定。
+
+3. 工具链的整合成本：DeepEval、Promptfoo、Giskard 等工具各有所长，但集成它们会引入多少维护成本？我今天的选型是更偏向“单一全能工具”还是“组合最佳工具”？这个决策在 3 个月后是否需要重新评估？
+
+    今天的选型明确偏向“组合最佳工具”：DeepEval 作为核心指标引擎（已深度集成，零维护成本），Promptfoo 用于安全红队（YAML 配置驱动，接入成本低），Deepchecks 留作生产监控（一行代码自动埋点）。三者的维护成本目前很低，因为它们各司其职、接口独立，升级单个工具不会影响其他模块。
+    但 3 个月后可能需要重新评估：若 DeepEval 持续强化其 Agent 评测和安全指标（2026 年已新增 6 项 Agentic 指标和部分安全指标），可能覆盖 Promptfoo 的核心能力；若 Deepchecks 同时补齐安全扫描，则可能形成“二选一”的简化机会。我的策略是：保持工具间松耦合（各自通过独立配置/脚本调用），确保替换成本可控。
+
+4. 自动化评测的粒度：今天的自动化脚本是跑一次全量数据集，但实际开发中每次代码提交都需要评测吗？如果每次只跑一小部分“冒烟测试”数据集，如何保证与全量评测的一致性？
+
+    每次代码提交跑全量 52 条数据集明显不现实——DeepEval 单条评测约 1-2 秒，全量需 1-2 分钟，且调用 LLM-as-judge 产生费用。实际 CI 中应只跑“冒烟测试”子集（约 10 条，覆盖 4 个类别 + 1 个对抗用例），耗时控制在 15 秒内。
+    保证与全量一致性的关键在于冒烟子集的代表性：从每个类别中按分数分布分层抽样（选 2 条历史高分、1 条历史低分），确保覆盖各类别和难度。此外，每天夜间定时运行全量评测，若发现冒烟通过但全量下降的情况，则回溯调整冒烟子集。
+    这一策略我尚未在脚本中实现，今天只是硬编码了全量运行。Day35 可以加入 --mode smoke|full 参数来区分两种运行模式。
+
+5. 基线值的锚定：今天我产出的基线报告，其分数本身只是起点。我如何定义“及格线”？是根据业务风险（如金融场景不能容忍幻觉），还是根据当前模型能力设定渐进目标？
+
+    我采用“双轨制”定义及格线：
+
+        硬性安全线（基于业务风险）：忠实度必须 ≥ 0.8，拒答率必须 ≥ 0.95。这是金融场景的不可妥协底线，低于此线直接阻断发布。
+
+        渐进优化线（基于当前能力）：答案相关性基线 0.895，下一轮目标 0.90；上下文召回率基线 0.823，下一轮目标 0.85。这些目标根据当前模型能力设定，每轮提升 2-3%，避免“一步到位”的挫败感。
+        今天的基线报告中，三项核心指标均超过硬性安全线，这让我对当前系统的底线质量有了信心。但上下文召回率 0.823 距离 0.85 的优化目标还有差距，根源在于对抗查询类别的低分拖累——这将成为 Day35 优化的重点方向。
+
+今日核心决策依据：
+设计评测体系时，我刻意区分了“RAG 内容质量”和“Agent 行为决策”两个维度，因为它们的优化路径截然不同——前者靠更好的检索和生成模型，后者靠更精准的路由逻辑和对抗训练。同时，选择 DeepEval + Promptfoo + Deepchecks 的“组合工具链”而非追求单一全能平台，是为了在当前阶段以最低成本覆盖三个关键评测阶段（开发→发布→生产），同时保持未来替换任意组件的灵活性。
+本回答由 AI 生成，内容仅供参考，请仔细甄别。
