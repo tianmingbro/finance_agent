@@ -12,14 +12,15 @@ from typing import List, Dict
 # LangChain 组件
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
+from document_parser import load_document  
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 load_dotenv()  # 从 .env 文件加载环境变量
 
 # -------------------- 配置 --------------------
-SOURCE_DIR = "week5_finance/data/source_docs"              # 法规文档目录
-OUTPUT_FILE = "week5_finance/data/candidate_qa.yaml"       # 输出文件
+SOURCE_DIR = "data/source_docs"              # 法规文档目录
+OUTPUT_FILE = "data/candidate_qa.yaml"       # 输出文件
 CHUNK_SIZE = 1200                            # 切片大小（字符）
 CHUNK_OVERLAP = 100
 TEMPERATURE = 0.3
@@ -76,11 +77,9 @@ QA_GENERATION_PROMPT = ChatPromptTemplate.from_messages([
     ("human", "【文档片段】\n{document_chunk}")
 ])
 # -------------------- 工具函数 --------------------
+
 def load_source_documents(directory: str) -> List[Dict[str, str]]:
-    """
-    加载所有法规文档，并切分为小块。
-    返回 [{"text": chunk, "source": filename}, ...]
-    """
+    """使用统一解析器加载所有支持的文档，并切分为小块"""
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
@@ -89,20 +88,22 @@ def load_source_documents(directory: str) -> List[Dict[str, str]]:
 
     all_chunks = []
     for file_path in Path(directory).glob("*"):
-        if file_path.suffix not in [".txt", ".md"]:
+        if file_path.suffix.lower() not in [".txt", ".md", ".pdf", ".docx","html"]:
             continue
         print(f"📄 加载文档: {file_path.name}")
-        loader = TextLoader(str(file_path), encoding="utf-8")
-        docs = loader.load()
-        chunks = splitter.split_documents(docs)
-        for chunk in chunks:
-            all_chunks.append({
-                "text": chunk.page_content,
-                "source": file_path.name
-            })
+        try:
+            docs = load_document(str(file_path))
+            chunks = splitter.split_documents(docs)
+            for chunk in chunks:
+                all_chunks.append({
+                    "text": chunk.page_content,
+                    "source": file_path.name
+                })
+        except Exception as e:
+            print(f"  ⚠️ 加载失败: {file_path.name} - {e}")
+
     print(f"✅ 共生成 {len(all_chunks)} 个文本切片")
     return all_chunks
-
 
 def generate_qa_for_chunk(chunk_text: str, chunk_index: int) -> List[Dict[str, str]]:
     """对单个切片调用 LLM 生成 QA 对，返回解析后的列表"""

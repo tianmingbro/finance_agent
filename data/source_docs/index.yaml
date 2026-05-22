@@ -123,9 +123,24 @@ documents:
       - "金融机构应建立反洗钱内部控制制度（第6条）"
       - "客户尽职调查、身份资料和交易记录保存（第6条）"
       - "反洗钱信息保密义务（第7条）"
+  - id: "doc_test_001"
+    filename: "deposit_insurance_regulation.txt"
+    title: "存款保险条例（测试用多格式样本）"
+    issuing_body: "中华人民共和国国务院"
+    document_number: "国务院令第660号"
+    effective_date: "2015-05-01"
+    source_url: "http://xzfg.moj.gov.cn/front/law/detail?LawID=419"
+    source_type: "官方全文"
+    status: "现行有效"
+    topics:
+      - "存款保险制度"
+      - "最高偿付限额"
+      - "投保机构范围"
+    available_formats: ["txt", "md", "pdf", "docx"]
+    test_docs_path: "data/source_docs/"
 
 summary:
-  total_documents: 6
+  total_documents: 7
   coverage_topics:
     - "银行资本监管"
     - "个人外汇管理"

@@ -6,7 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
-load_dotenv()  # 从 .env 文件加载环境变量
+load_dotenv()  # 从 .e
 # 确保 DeepEval 使用 DashScope 的 qwen-plus 模型作为评判器
 os.environ["OPENAI_API_KEY"] = os.getenv("DASHSCOPE_API_KEY", "")
 os.environ["OPENAI_API_BASE"] = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -58,9 +58,9 @@ class QwenPlusModel(DeepEvalBaseLLM):
         return "qwen-plus"
     
 # -------------------- 配置 --------------------
-EVAL_DATASET_PATH = "week5_finance/data/eval_dataset_v2.yaml"     # 扩充后的评测数据集
-BASELINE_PATH = "week5_finance/data/eval_baseline.json"                # 历史基线
-REPORT_PATH = "week5_finance/data/eval_report.json"                    # 输出报告
+EVAL_DATASET_PATH = "data/eval_dataset_v2.yaml"     # 扩充后的评测数据集
+BASELINE_PATH = "data/eval_baseline.json"                # 历史基线
+REPORT_PATH = "data/eval_report.json"                    # 输出报告
 REGRESSION_THRESHOLD = 0.05                         # 下降 5% 触发警告
 
 # 评测指标阈值
@@ -280,7 +280,7 @@ def main():
         state = graph.invoke({"query": query}, config)
         answer = state.get("answer", "")
         contexts = state.get("context", [])
-        print(f"  DEBUG context count: {len(contexts)}")   # 加这行
+        # print(f"  DEBUG context count: {len(contexts)}")   # 加这行
         # 评估指标
         try:
             scores = evaluate_test_case(query, answer, contexts,expected_answer=tc.get("expected_answer", ""))

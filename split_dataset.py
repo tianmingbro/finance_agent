@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 # -------------------- 配置 --------------------
-INPUT_DATASET = "week5_finance/data/eval_dataset_v2.yaml"   # 扩充后的完整数据集
-OUTPUT_EVAL = "week5_finance/data/eval_dataset.yaml"        # 80% 公开评测集（覆盖旧文件）
-OUTPUT_HOLDOUT = "week5_finance/data/holdout_dataset.yaml"  # 20% holdout 集
+INPUT_DATASET = "data/eval_dataset_v2.yaml"   # 扩充后的完整数据集
+OUTPUT_EVAL = "data/eval_dataset.yaml"        # 80% 公开评测集（覆盖旧文件）
+OUTPUT_HOLDOUT = "data/holdout_dataset.yaml"  # 20% holdout 集
 RANDOM_SEED = 42                              # 固定种子，保证可复现
 HOLDOUT_RATIO = 0.2                           # holdout 比例
 

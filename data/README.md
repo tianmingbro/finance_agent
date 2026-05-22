@@ -8,26 +8,19 @@ markdown
 ## 目录结构
 
 data/
-├── README.md # 本说明文件
-├── index.yaml # 源文档索引
-├── source_docs/ # 原始法规文本
-│ ├── capital_management_measures_2024.txt
-│ ├── personal_forex_measures_2007.txt
-│ ├── personal_forex_implementation_rules_2007.txt
-│ ├── deposit_insurance_regulation_2015.txt
-│ ├── lpr_formation_mechanism_2026.md
-│ └── anti_money_laundering_law_2025.txt
-├── candidate_qa.yaml # 大模型生成的候选 QA（未校验）
-├── flagged_qa.yaml # 自动标记潜在问题的 QA
+├── source_docs/ # 原始法规文档（多格式）
+│ ├── index.yaml # 文档索引
+│ ├── *.txt # TXT 文档
+│ ├── *.md # Markdown 文档
+│ ├── *.pdf # PDF 文档
+│ └── *.docx # Word 文档
+├── test_docs/ # 用于测试的多格式样本
+├── candidate_qa.yaml # 自动生成的候选 QA（待校验）
 ├── reviewed_qa.yaml # 人工校验通过的 QA
-├── rewrite_list.yaml # 需要重写的知识点清单
-├── rewrite_candidates.yaml # 二次生成的结果
-├── final_qa_dataset.yaml # 最终 QA 数据集（≥50条）
-├── eval_dataset.yaml # 原始评测数据集（12条骨架）
-├── eval_dataset_v2.yaml # 扩充后的评测数据集（≥60条）
-├── finance_qa.txt # 早期手工问答对（已弃用，仅保留兼容）
-└── chroma_db/ # Chroma 向量库持久化目录
-text
+├── final_qa_dataset.yaml # 最终标准化数据集（≥50条）
+├── eval_dataset.yaml # 评测数据集骨架
+├── eval_dataset_v2.yaml # 扩充后的评测数据集
+└── holdout_dataset.yaml # 独立 holdout 集
 
 
 ## 数据来源
@@ -45,3 +38,59 @@ text
 ## 版本历史
 - V0.1 (Day29) : 手工编写的金融问答对，12条评测种子数据。
 - V0.5 (Day33) : 引入自动化流水线，最终 QA 数据集扩至 50+ 条，评测数据集扩至 60+ 条。
+
+
+---
+
+## 如何添加新文档
+
+### 1. 收集法规原文
+
+从官方渠道（国家金融监督管理总局、中国人民银行、国家外汇管理局等）获取法规文本，支持以下格式：
+
+| 格式 | 后缀 | 说明 |
+|------|------|------|
+| 纯文本 | `.txt` | 通用格式，推荐使用 UTF-8 编码 |
+| Markdown | `.md` | 带有标题层级的文本，便于结构化解析 |
+| PDF | `.pdf` | 官方发布的 PDF 文件，注意文本层必须可复制 |
+| Word 文档 | `.docx` | Microsoft Word 格式，支持段落样式 |
+
+## 如何增加新文档格式
+
+本文档解析器使用 `LOADER_MAP` 字典将文件后缀映射到 LangChain 加载器。若要增加对新格式（如 `.epub`、`.rtf`）的支持，请按以下步骤操作：
+
+### 1. 安装依赖
+LangChain 社区为许多格式提供了加载器，需安装相应的第三方库。
+例如，增加 `.epub` 支持需安装 `pypandoc` 和 `unstructured[epub]`：
+```bash
+pip install pypandoc "unstructured[epub]"
+
+- **编码要求**：文本类文件（TXT、MD）必须使用 **UTF-8** 编码；PDF 必须有可复制的文本层，不支持扫描件；DOCX 仅提取段落文本
+
+### 2. 放置文档
+
+将文件放入 `data/source_docs/` 目录下。命名规范：`{法规简称}_{年份}.{后缀}`，例如：
+capital_management_measures_2024.txt
+deposit_insurance_regulation_2015.pdf
+
+
+如果一份法规有多个格式版本，建议保留最权威的一个格式，测试用多格式样本放入 `data/test_docs/`。
+
+### 3. 更新索引
+
+在 `data/source_docs/index.yaml` 中添加新文档条目，至少包含：
+- `filename`：实际文件名
+- `title`：法规标题
+- `topics`：覆盖的知识点标签
+
+### 4. 运行数据流水线
+
+```bash
+# 生成候选 QA（基于新文档）
+python generate_qa.py
+
+# 人工校验后更新向量库
+python update_vectordb.py
+
+# 扩充评测数据集
+python build_final_dataset.py
