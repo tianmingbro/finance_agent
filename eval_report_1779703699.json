@@ -1,0 +1,71 @@
+{
+  "total_test_cases": 3,
+  "overall_pass_rate": 0.0,
+  "metrics_summary": {
+    "faithfulness": {
+      "mean": 0.23529411764705885,
+      "std": 0.4075413664867947,
+      "min": 0.0,
+      "max": 0.7058823529411765
+    },
+    "answer_relevancy": {
+      "mean": 0.3333333333333333,
+      "std": 0.5773502691896257,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "contextual_recall": {
+      "mean": 0.3333333333333333,
+      "std": 0.5773502691896257,
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "baseline": {
+    "faithfulness": 0.7935938330675173,
+    "answer_relevancy": 0.7254755996691481,
+    "contextual_recall": 0.3333333333333333
+  },
+  "regression_warnings": [
+    "⚠️ faithfulness: 基线 0.794 → 当前 0.235 (下降 70.4%)",
+    "⚠️ answer_relevancy: 基线 0.725 → 当前 0.333 (下降 54.1%)"
+  ],
+  "detailed_results": [
+    {
+      "id": "new_005",
+      "query": "某境外注册的虚拟货币交易所未在中国境内设立分支机构，但其平台向中国公民提供账户开立及交易服务，并被发现协助转移非法资金。该行为是否可能适用第十二条追究法律责任？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "contextual_recall": 0.0
+      }
+    },
+    {
+      "id": "new_011",
+      "query": "若客户拒绝提供真实有效的身份证件，且拒不配合尽职调查，金融机构采取限制业务措施后又提交了可疑交易报告，该做法是否合规？",
+      "category": "reasoning_query",
+      "answer": "是的，该做法**完全合规**，且符合《反洗钱法》及相关配套制度的明确规定。具体分析如下：\n\n---\n\n✅ **一、法律依据充分**\n\n1. **客户配合义务明确（第三十八条第一款）**  \n   > “与金融机构存在业务关系的单位和个人应当配合金融机构的客户尽职调查，提供真实有效的身份证件或者其他身份证明文件，准确、完整填报身份信息……”  \n   → 拒绝提供真实有效身份证件，已构成**法定配合",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.7058823529411765,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_006",
+      "query": "我是一家私募基金公司，想绕过客户尽职调查要求，用第三方名义开户来加快募资流程，这样可以吗？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": 0.0,
+        "answer_relevancy": 0.0,
+        "contextual_recall": 0.0
+      }
+    }
+  ]
+}

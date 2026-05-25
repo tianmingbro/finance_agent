@@ -14,6 +14,7 @@ from typing import List, Dict
 
 # LangChain 组件（与 FinancialRAGSkill 保持一致）
 from langchain_community.document_loaders import TextLoader
+from document_parser import load_document
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
@@ -26,9 +27,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "models","text2vec-base-chinese","Jerry0", "text2vec-base-chinese")
 
 # -------------------- 配置 --------------------
-FINAL_QA_FILE = "week5_finance/data/final_qa_dataset.yaml"      # 输入：最终 QA 数据集
-EVAL_DATASET_FILE = "week5_finance/data/eval_dataset.yaml"      # 评测数据集（Day29 骨架）
-EXPANDED_EVAL_FILE = "week5_finance/data/eval_dataset_v2.yaml"  # 扩充后的评测数据集
+FINAL_QA_FILE = "data/final_qa_dataset.yaml"      # 输入：最终 QA 数据集
+EVAL_DATASET_FILE = "data/eval_dataset.yaml"      # 评测数据集（Day29 骨架）
+EXPANDED_EVAL_FILE = "data/eval_dataset_v2.yaml"  # 扩充后的评测数据集
 CHROMA_PERSIST_DIR = os.path.join(BASE_DIR, "chroma_db")  # Chroma 向量库目录（与 skill 同目录，确保路径一致）
 CHUNK_SIZE = 300
 CHUNK_OVERLAP = 50
@@ -74,10 +75,82 @@ def build_documents_from_qa(qa_list: List[Dict[str, str]]) -> List[Document]:
         docs.append(Document(page_content=content, metadata=metadata))
     return docs
 
+def load_and_chunk_all_documents(source_dir: str = "data/source_docs"):
+    """
+    新增：直接从原始文档目录加载所有支持的格式，切片后返回 Document 列表。
+    用于向量库首次构建或批量更新。
+    """
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP,
+        separators=["\n\n", "\n", "。", "！", "？", "；", " ", ""]
+    )
+    all_docs = []
+    for file_path in Path(source_dir).glob("*"):
+        suffix = file_path.suffix.lower()
+        if suffix not in [".txt", ".md", ".pdf", ".docx"]:
+            continue
+        print(f"📄 从原始文档加载: {file_path.name}")
+        try:
+            docs = load_document(str(file_path))
+            chunks = splitter.split_documents(docs)
+            all_docs.extend(chunks)
+        except Exception as e:
+            print(f"  ⚠️ 加载失败: {file_path.name} - {e}")
+    return all_docs
 
-def update_vectorstore(docs: List[Document]):
-    """将文档切片后写入 Chroma（增量添加，不清空旧数据）"""
-    print(f"📄 准备将 {len(docs)} 条 QA 对写入向量库...")
+# def update_vectorstore(docs: List[Document]):
+#     """将文档切片后写入 Chroma（增量添加，不清空旧数据）"""
+#     print(f"📄 准备将 {len(docs)} 条 QA 对写入向量库...")
+
+#     # 切片
+#     splitter = RecursiveCharacterTextSplitter(
+#         chunk_size=CHUNK_SIZE,
+#         chunk_overlap=CHUNK_OVERLAP,
+#     )
+#     chunks = splitter.split_documents(docs)
+#     print(f"🔪 切片得到 {len(chunks)} 个片段")
+
+#     # 初始化 Embedding
+#     embedding = HuggingFaceEmbeddings(
+#         model_name=MODEL_PATH,
+#         model_kwargs={"device": "cpu"},
+#         encode_kwargs={"normalize_embeddings": True},
+        
+#     )
+
+#     # 连接 Chroma（若目录不存在会创建）
+#     vectorstore = Chroma(
+#         persist_directory=CHROMA_PERSIST_DIR,
+#         embedding_function=embedding,
+#         collection_name="finance_qa",
+#     )
+
+#     # # 添加文档
+#     # vectorstore.add_documents(chunks)
+#     # print(f"✅ 已成功写入向量库 (Chroma @ {CHROMA_PERSIST_DIR})")
+#     # 为每个文档生成基于内容的唯一 ID
+#     new_docs = []
+#     new_ids = []
+#     for doc in docs:
+#         doc_id = hashlib.md5(doc.page_content.encode()).hexdigest()
+#         # 检查是否已存在（可选，upsert 本身就会覆盖，不会重复）
+#         existing = vectorstore.get(doc_id)
+#         if existing and existing["ids"]:
+#             continue  # 已存在，跳过（如不需覆盖则保留；若内容`可能更新则改用 upsert）
+#         new_docs.append(doc)
+#         new_ids.append(doc_id)
+
+#     if new_docs:
+#         vectorstore.add_documents(documents=new_docs, ids=new_ids)
+#         print(f"✅ 新增 {len(new_docs)} 个切片，已跳过 {len(docs)-len(new_docs)} 个重复")
+#     else:
+#         print("✅ 所有切片均已存在，无重复添加")
+
+
+def update_vectorstore(docs: List[Document], force: bool = False):
+    """将文档切片后写入 Chroma，基于内容哈希去重，避免重复添加。"""
+    print(f"📄 准备将 {len(docs)} 条文档写入向量库...")
 
     # 切片
     splitter = RecursiveCharacterTextSplitter(
@@ -92,37 +165,36 @@ def update_vectorstore(docs: List[Document]):
         model_name=MODEL_PATH,
         model_kwargs={"device": "cpu"},
         encode_kwargs={"normalize_embeddings": True},
-        
     )
 
-    # 连接 Chroma（若目录不存在会创建）
+    # 连接 Chroma
     vectorstore = Chroma(
         persist_directory=CHROMA_PERSIST_DIR,
         embedding_function=embedding,
         collection_name="finance_qa",
     )
 
-    # # 添加文档
-    # vectorstore.add_documents(chunks)
-    # print(f"✅ 已成功写入向量库 (Chroma @ {CHROMA_PERSIST_DIR})")
-    # 为每个文档生成基于内容的唯一 ID
-    new_docs = []
-    new_ids = []
-    for doc in docs:
-        doc_id = hashlib.md5(doc.page_content.encode()).hexdigest()
-        # 检查是否已存在（可选，upsert 本身就会覆盖，不会重复）
-        existing = vectorstore.get(doc_id)
+    # 为每个切片生成基于内容的唯一 MD5 ID
+    new_docs, new_ids = [], []
+    for chunk in chunks:
+        content = chunk.page_content
+        doc_id = hashlib.md5(content.encode("utf-8")).hexdigest()
+
+        # 查询该 ID 是否已存在
+        existing = vectorstore.get(ids=[doc_id])
         if existing and existing["ids"]:
-            continue  # 已存在，跳过（如不需覆盖则保留；若内容可能更新则改用 upsert）
-        new_docs.append(doc)
+            if not force:
+                continue   # 非强制模式下跳过已存在文档
+            # 强制更新：先删除旧文档
+            vectorstore.delete(ids=[doc_id])
+        new_docs.append(chunk)
         new_ids.append(doc_id)
 
     if new_docs:
         vectorstore.add_documents(documents=new_docs, ids=new_ids)
-        print(f"✅ 新增 {len(new_docs)} 个切片，已跳过 {len(docs)-len(new_docs)} 个重复")
+        print(f"✅ 新增 {len(new_docs)} 个切片，跳过 {len(chunks) - len(new_docs)} 个重复切片")
     else:
-        print("✅ 所有切片均已存在，无重复添加")
-
+        print("✅ 所有切片均已存在，无重复写入")
 
 import re
 
@@ -162,7 +234,76 @@ def classify_query(query: str) -> str:
     # ====== 事实类（默认） ======
     return "factual_query"
 
+# def expand_eval_dataset(final_qa_list: List[Dict], eval_path: str, output_path: str):
+#     # 加载原评测数据集
+#     if Path(eval_path).exists():
+#         with open(eval_path, "r", encoding="utf-8") as f:
+#             eval_data = yaml.safe_load(f)
+#     else:
+#         eval_data = {"categories": []}
+
+#     if "categories" not in eval_data:
+#         eval_data["categories"] = []
+#     categories = {cat["category"]: cat for cat in eval_data["categories"]}
+
+#     target = 15  # 每类最少 15 条
+#     required = {
+#         "factual_query": "事实查询",
+#         "reasoning_query": "推理查询",
+#         "ambiguous_query": "模糊查询",
+#         "adversarial_query": "对抗查询",
+#     }
+
+#     # 确保所有类别都存在
+#     for c_name, desc in required.items():
+#         if c_name not in categories:
+#             categories[c_name] = {"category": c_name, "description": desc, "entries": []}
+
+#     # 当前各类别数量
+#     current_counts = {c: len(categories[c]["entries"]) for c in required}
+
+#     # 从 final QA 中分配新条目，直至各类别均达标
+#     new_entries = []
+#     for item in final_qa_list:
+#         query = item.get("query") or item.get("question", "")
+#         answer = item.get("answer", "")
+#         if not query or not answer:
+#             continue
+
+#         # 自动分类
+#         cat = classify_query(query)
+#         if current_counts.get(cat, 0) < target:
+#             new_entries.append({
+#                 "id": f"new_{len(new_entries):03d}",
+#                 "query": query,
+#                 "expected_answer": answer,
+#                 "source": item.get("source", ""),
+#             })
+#             current_counts[cat] += 1
+
+#         # 如果所有类别都已达标，提前退出
+#         if all(v >= target for v in current_counts.values()):
+#             break
+
+#     # 将新条目追加到对应类别
+#     for entry in new_entries:
+#         # 需要根据内容重新确定类别，这里简单保留分类
+#         cat = classify_query(entry["query"])
+#         categories[cat]["entries"].append(entry)
+
+#     eval_data["categories"] = list(categories.values())
+
+#     with open(output_path, "w", encoding="utf-8") as f:
+#         yaml.dump(eval_data, f, allow_unicode=True, sort_keys=False)
+
+#     print(f"✅ 评测数据集已扩充，保存至 {output_path}")
+#     for cat in eval_data["categories"]:
+#         print(f"   - {cat['category']}: {len(cat['entries'])} 条")
+
 def expand_eval_dataset(final_qa_list: List[Dict], eval_path: str, output_path: str):
+    """扩充评测数据集，基于 query 去重，保证各类别至少有 target 条新样本。"""
+    target = 15  # 每类最少 15 条
+
     # 加载原评测数据集
     if Path(eval_path).exists():
         with open(eval_path, "r", encoding="utf-8") as f:
@@ -172,17 +313,23 @@ def expand_eval_dataset(final_qa_list: List[Dict], eval_path: str, output_path: 
 
     if "categories" not in eval_data:
         eval_data["categories"] = []
-    categories = {cat["category"]: cat for cat in eval_data["categories"]}
 
-    target = 15  # 每类最少 15 条
+    # 建立现有 query 集合（用于去重）
+    existing_queries = set()
+    for cat in eval_data["categories"]:
+        for entry in cat.get("entries", []):
+            q = entry.get("query", "")
+            if q:
+                existing_queries.add(q)
+
+    # 初始化必需类别
     required = {
         "factual_query": "事实查询",
         "reasoning_query": "推理查询",
         "ambiguous_query": "模糊查询",
         "adversarial_query": "对抗查询",
     }
-
-    # 确保所有类别都存在
+    categories = {cat["category"]: cat for cat in eval_data["categories"]}
     for c_name, desc in required.items():
         if c_name not in categories:
             categories[c_name] = {"category": c_name, "description": desc, "entries": []}
@@ -190,41 +337,49 @@ def expand_eval_dataset(final_qa_list: List[Dict], eval_path: str, output_path: 
     # 当前各类别数量
     current_counts = {c: len(categories[c]["entries"]) for c in required}
 
-    # 从 final QA 中分配新条目，直至各类别均达标
-    new_entries = []
+    # 从 final QA 中挑选不存在于评测集中的 query，分配到未达标的类别
+    new_entries_by_cat = {c: [] for c in required}
     for item in final_qa_list:
         query = item.get("query") or item.get("question", "")
         answer = item.get("answer", "")
-        if not query or not answer:
+        if not query or not answer or query in existing_queries:
             continue
 
-        # 自动分类
-        cat = classify_query(query)
-        if current_counts.get(cat, 0) < target:
-            new_entries.append({
-                "id": f"new_{len(new_entries):03d}",
-                "query": query,
-                "expected_answer": answer,
-                "source": item.get("source", ""),
-            })
-            current_counts[cat] += 1
+        # 简单分类：根据 query 内容决定类别（也可统一归入 factual_query）
+        cat = classify_query(query)  # 见下方辅助函数
+        if current_counts[cat] >= target:
+            # 该类别已达标，可以尝试放入其他未达标类别
+            for alt_cat in required:
+                if current_counts[alt_cat] < target:
+                    cat = alt_cat
+                    break
+            else:
+                continue  # 所有类别均已达标，停止
 
-        # 如果所有类别都已达标，提前退出
+        new_entries_by_cat[cat].append({
+            "id": f"new_{len(existing_queries) + sum(len(v) for v in new_entries_by_cat.values()):03d}",
+            "query": query,
+            "expected_answer": answer,
+            "source": item.get("source", ""),
+        })
+        existing_queries.add(query)
+        current_counts[cat] += 1
+
+        # 如果所有类别都达标，可提前结束
         if all(v >= target for v in current_counts.values()):
             break
 
     # 将新条目追加到对应类别
-    for entry in new_entries:
-        # 需要根据内容重新确定类别，这里简单保留分类
-        cat = classify_query(entry["query"])
-        categories[cat]["entries"].append(entry)
+    for cat, entries in new_entries_by_cat.items():
+        categories[cat]["entries"].extend(entries)
 
     eval_data["categories"] = list(categories.values())
 
     with open(output_path, "w", encoding="utf-8") as f:
         yaml.dump(eval_data, f, allow_unicode=True, sort_keys=False)
 
-    print(f"✅ 评测数据集已扩充，保存至 {output_path}")
+    total_new = sum(len(v) for v in new_entries_by_cat.values())
+    print(f"✅ 评测数据集已保存至 {output_path}，新增 {total_new} 条不重复用例")
     for cat in eval_data["categories"]:
         print(f"   - {cat['category']}: {len(cat['entries'])} 条")
 
@@ -261,14 +416,15 @@ if __name__ == "__main__":
         print(f"❌ 未找到 {FINAL_QA_FILE}，请先完成人工校验并生成 final_qa_dataset.yaml")
         sys.exit(1)
     qa_list = load_final_qa_dataset(FINAL_QA_FILE)
-    print(f"📋 加载最终 QA 数据集，共 {len(qa_list)} 条")
-
-    # 2. 转换并写入向量库
-    docs = build_documents_from_qa(qa_list)
-    if docs:
-        update_vectorstore(docs)
-    else:
-        print("⚠️ 没有有效文档，跳过向量库更新")
+    # print(f"📋 加载最终 QA 数据集，共 {len(qa_list)} 条")
+     # 1. 加载 QA 数据集
+    qa_docs = build_documents_from_qa(qa_list)
+    # 2. 加载原始文档（多格式）
+    source_docs = load_and_chunk_all_documents()
+    all_docs = qa_docs + source_docs
+    
+    print(f"📋 准备写入向量库的文档总数: {len(all_docs)} (QA: {len(qa_docs)}, 原始: {len(source_docs)})")
+    update_vectorstore(all_docs)
 
     # 3. 扩充评测数据集
     expand_eval_dataset(qa_list, EVAL_DATASET_FILE, EXPANDED_EVAL_FILE)
