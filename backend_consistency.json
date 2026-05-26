@@ -1,0 +1,41 @@
+{
+  "results": [
+    {
+      "query": "存款保险最高偿付限额是多少？",
+      "jaccard": 1.0,
+      "chroma_count": 2,
+      "pgvector_count": 2
+    },
+    {
+      "query": "个人外汇便利化额度是多少？",
+      "jaccard": 1.0,
+      "chroma_count": 2,
+      "pgvector_count": 2
+    },
+    {
+      "query": "商业银行的核心一级资本充足率要求？",
+      "jaccard": 1.0,
+      "chroma_count": 2,
+      "pgvector_count": 2
+    },
+    {
+      "query": "LPR最新报价是多少？",
+      "jaccard": 1.0,
+      "chroma_count": 2,
+      "pgvector_count": 2
+    },
+    {
+      "query": "资本充足率不达标会有什么后果？",
+      "jaccard": 1.0,
+      "chroma_count": 2,
+      "pgvector_count": 2
+    },
+    {
+      "query": "反洗钱法规定了哪些义务？",
+      "jaccard": 1.0,
+      "chroma_count": 2,
+      "pgvector_count": 2
+    }
+  ],
+  "average_jaccard": 1.0
+}

@@ -8,6 +8,7 @@ Day34 核心交付物：自动化评测流水线 + 回归检测（第6周完善�
   3. 使用 DeepEval 原生 evaluate() 函数，享受内置缓存、异步执行与进度条
   4. 单用例失败不影响整体评测
 """
+from datetime import datetime
 import os
 import sys
 import json
@@ -22,10 +23,6 @@ from threading import Lock
 from dotenv import load_dotenv
 load_dotenv()
 
-# 确保 DeepEval 使用 DashScope 的 qwen-plus 模型作为评判器
-os.environ["OPENAI_API_KEY"] = os.getenv("DASHSCOPE_API_KEY", "")
-os.environ["OPENAI_API_BASE"] = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-
 # LangChain / LangGraph
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
@@ -38,39 +35,46 @@ from deepeval.test_case import LLMTestCase
 from deepeval.models import DeepEvalBaseLLM
 from deepeval import evaluate
 from deepeval.evaluate import AsyncConfig, CacheConfig, ErrorConfig
-
+from deepeval.models import GPTModel
 from openai import OpenAI
 
 # 现有技能
 from financial_rag_skill import FinancialRAGSkill
 from integrated_graph import GraphState
 
-
+os.environ["VECTOR_STORE_BACKEND"] = "pgvector"  # 评测时默认使用 PGVector，确保与生产环境一致  
 # -------------------- Qwen-Plus 评估模型 --------------------
-class QwenPlusModel(DeepEvalBaseLLM):
-    def __init__(self):
-        self.client = OpenAI(
-            api_key=os.getenv("DASHSCOPE_API_KEY"),
-            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-        )
+# class QwenPlusModel(DeepEvalBaseLLM):
+#     def __init__(self, model_name="qwen-plus"):
+#         self.client = OpenAI(
+#             api_key=os.getenv("DASHSCOPE_API_KEY"),
+#             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+#         )
+#         self.model_name = model_name
 
-    def load_model(self):
-        pass
+#     def load_model(self):
+#         pass
 
-    def generate(self, prompt: str) -> str:
-        response = self.client.chat.completions.create(
-            model="qwen-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0,
-        )
-        return response.choices[0].message.content
+#     def generate(self, prompt: str) -> str:
+#         response = self.client.chat.completions.create(
+#             model="qwen-turbo",
+#             messages=[{"role": "user", "content": prompt}],
+#             temperature=0,
+#         )
+#         return response.choices[0].message.content
 
-    async def a_generate(self, prompt: str) -> str:
-        return self.generate(prompt)
+#     async def a_generate(self, prompt: str) -> str:
+#         return self.generate(prompt)
 
-    def get_model_name(self) -> str:
-        return "qwen-turbo"
+#     def get_model_name(self) -> str:
+#         return "qwen-turbo"
 
+# 全局评测模型（GPTModel 接受自定义客户端）
+EVAL_MODEL = GPTModel(
+    model="qwen-plus",
+    api_key=os.getenv("DASHSCOPE_API_KEY"),
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
 
 # -------------------- 配置 --------------------
 EVAL_DATASET_PATH = "data/eval_dataset_v2.yaml"
@@ -90,7 +94,6 @@ ENABLE_PARALLEL = True       # 设为 False 可切回串行模式
 
 # 打印锁，防止并发输出混乱
 print_lock = Lock()
-
 
 # -------------------- 数据集加载 --------------------
 def load_eval_dataset(path: str) -> List[Dict[str, Any]]:
@@ -153,78 +156,29 @@ def build_rag_graph(skill: FinancialRAGSkill):
     return builder.compile(checkpointer=memory)
 
 
-# -------------------- 单用例评测（被并行调用） --------------------
-# def evaluate_test_case(
-#     query: str,
-#     answer: str,
-#     contexts: List[str],
-#     expected_answer: str = "",
-#     metrics_cache: Optional[Dict[str, Any]] = None,
-# ) -> Dict[str, float]:
-#     """
-#     对单个测试用例运行三项 DeepEval 指标。
-#     支持传入已创建的 metrics 实例来复用。
-#     """
-#     test_case = LLMTestCase(
-#         input=query,
-#         actual_output=answer,
-#         retrieval_context=contexts,
-#         expected_output=expected_answer,
-#     )
-
-#     eval_model = QwenPlusModel()
-#     scores = {}
-
-#     # 1. Faithfulness
-#     metric = FaithfulnessMetric(
-#         model=eval_model,
-#         threshold=METRIC_THRESHOLDS["faithfulness"],
-#         include_reason=False,
-#         async_mode=True,  # 启用指标内部异步
-#     )
-#     metric.measure(test_case)
-#     scores["faithfulness"] = metric.score
-
-#     # 2. AnswerRelevancy
-#     metric = AnswerRelevancyMetric(
-#         model=eval_model,
-#         threshold=METRIC_THRESHOLDS["answer_relevancy"],
-#         include_reason=False,
-#         async_mode=True,
-#     )
-#     metric.measure(test_case)
-#     scores["answer_relevancy"] = metric.score
-
-#     # 3. ContextualRecall（需要 expected_answer）
-#     if expected_answer.strip():
-#         metric = ContextualRecallMetric(
-#             model=eval_model,
-#             threshold=METRIC_THRESHOLDS["contextual_recall"],
-#             include_reason=False,
-#             async_mode=True,
-#         )
-#         metric.measure(test_case)
-#         scores["contextual_recall"] = metric.score
-#     else:
-#         scores["contextual_recall"] = 0.0
-
-#     return scores
-
-def evaluate_test_case(query, answer, contexts):
+def evaluate_test_case(query: str, answer: str, contexts: List[str], expected_answer: str = "") -> Dict[str, float]:
     scores = {"faithfulness": 0.0, "answer_relevancy": 0.0, "contextual_recall": 0.0}
+        # 创建自定义的 OpenAI 客户端，指向 DashScope
+
     for metric_name, MetricCls in [
         ("faithfulness", FaithfulnessMetric),
         ("answer_relevancy", AnswerRelevancyMetric),
         ("contextual_recall", ContextualRecallMetric),
     ]:
         try:
-            metric = MetricCls(model="qwen-plus", threshold=0.7, timeout=15)
+            metric = MetricCls(model=EVAL_MODEL, threshold=0.7,include_reason=False,
+                            )
             test_case = LLMTestCase(input=query, actual_output=answer, retrieval_context=contexts)
+            if metric_name=="contextual_recall":
+                if not expected_answer:
+                    raise ValueError("缺少 expected_answer，无法计算 ContextualRecall")
+                
+                test_case.expected_output = expected_answer
             metric.measure(test_case)
-            scores[metric_name] = metric.score
+            scores[metric_name] = metric.score if metric.score is not None else 0.0
         except Exception as e:
             print(f"    ⚠️ {metric_name} 评测失败: {e}")
-            scores[metric_name] = None   # 标记为缺失
+            scores[metric_name] = 0.0   # 标记为缺失
     return scores
 
 # -------------------- 并行批量评测 --------------------
@@ -374,7 +328,7 @@ def main():
 
     # 备份旧报告
     if Path(REPORT_PATH).exists():
-        backup = f"eval_report_{int(time.time())}.json"
+        backup = f"eval_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         os.rename(REPORT_PATH, backup)
         print(f"📦 旧报告已备份为 {backup}")
 

@@ -23,6 +23,7 @@ class LoaderFacade:
     def __init__(self):
         self._loaders: Dict[str, Type[BaseLoader]] = {
             ".txt": TextLoader,
+            ".md": TextLoader,
             ".pdf": PyPDFLoader,
             ".docx": Docx2txtLoader,
         }
