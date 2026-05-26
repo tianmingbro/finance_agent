@@ -34,6 +34,8 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 load_dotenv()
 from vector_store_interface import create_vector_store
+from hybrid_retriever import HybridRetriever, create_bm25_retriever
+from langchain_core.documents import Document
 
 # -------------------- 配置 --------------------
 # 请确保已设置环境变量 DASHSCOPE_API_KEY
@@ -143,6 +145,7 @@ class ResourceManager:
         self.embedding_model_name = MODEL_PATH
         # 读取环境变量决定后端
         self._backend = os.getenv("VECTOR_STORE_BACKEND", "chroma")
+        self._hybrid_retriever = None
 
     def load_resources(self):
         """首次调用时加载所有重资源，后续直接返回缓存"""
@@ -221,6 +224,21 @@ class ResourceManager:
         self._retriever = self._vectorstore.as_retriever(
             search_kwargs={"k": self.search_k}
         )
+        # ── 新增：构建 BM25 检索器 ──────────────────────
+        bm25_docs = self._load_bm25_documents()
+        bm25_retriever = create_bm25_retriever(bm25_docs, k=self.search_k)
+
+        # ── 创建混合检索器 ─────────────────────────────
+        self._hybrid_retriever = HybridRetriever(
+            vector_retriever=self._retriever ,
+            bm25_retriever=bm25_retriever,
+            fusion_strategy="rrf",   # 默认 RRF，可配置
+            k=self.search_k,
+            fetch_k=20,              # 扩大候选池
+        )
+
+        # 将混合检索器赋值给 self._retriever，供 RAG 链使用
+        self._retriever = self._hybrid_retriever
 
         # LLM (Qwen-plus, 使用 OpenAI 兼容模式)
         print("🧠 [延迟加载] 正在连接 Qwen-plus 模型...")
@@ -232,7 +250,7 @@ class ResourceManager:
         )
 
         self._loaded = True
-        print("✅ 所有重资源加载完成")
+        print("✅ 所有重资源加载完成,混合检索器已就绪 (向量 + BM25)")
 
     def _ingest_documents(self):
         """从原始文档构建向量索引"""
@@ -245,7 +263,34 @@ class ResourceManager:
         chunks = splitter.split_documents(docs)
         print(f"📝 正在将 {len(chunks)} 个切片写入 {self._backend}...")
         self._vectorstore.add_documents(chunks)
-        
+
+    def _load_bm25_documents(self) -> List[Document]:
+        """从知识库文档中加载用于 BM25 索引的文档"""
+        import yaml
+        from pathlib import Path
+        from langchain_core.documents import Document
+
+        qa_path = Path("data/final_qa_dataset.yaml")
+        docs = []
+        if qa_path.exists():
+            with open(qa_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            qa_list = data if isinstance(data, list) else data.get("final_qa_dataset", [])
+            for item in qa_list:
+                query = item.get("query") or item.get("question", "")
+                answer = item.get("answer", "")
+                if query and answer:
+                    # 将问答拼接为文档，让 BM25 能匹配问题和答案中的关键词
+                    content = f"问题：{query}\n答案：{answer}"
+                    docs.append(Document(page_content=content, metadata={"source": "qa_dataset"}))
+        # 如果 QA 数据集不存在，回退到原始文档
+        if not docs:
+            from langchain_community.document_loaders import TextLoader
+            for file in Path("data/source_docs").glob("*.txt"):
+                loader = TextLoader(str(file), encoding="utf-8")
+                docs.extend(loader.load())
+        return docs  
+      
     @property
     def retriever(self):
         if not self._loaded:

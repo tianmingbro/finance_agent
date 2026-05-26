@@ -89,7 +89,7 @@ METRIC_THRESHOLDS = {
 }
 
 # 并行评测配置
-MAX_CONCURRENT = 1          # 并发度（qwen-plus 限流 200 QPM，6 并发安全）
+MAX_CONCURRENT = 6          # 并发度（qwen-plus 限流 200 QPM，6 并发安全）
 ENABLE_PARALLEL = True       # 设为 False 可切回串行模式
 
 # 打印锁，防止并发输出混乱
