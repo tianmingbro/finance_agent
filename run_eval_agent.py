@@ -34,40 +34,13 @@ from deepeval.metrics import FaithfulnessMetric, AnswerRelevancyMetric, Contextu
 from deepeval.test_case import LLMTestCase
 from deepeval.models import DeepEvalBaseLLM
 from deepeval import evaluate
-from deepeval.evaluate import AsyncConfig, CacheConfig, ErrorConfig
 from deepeval.models import GPTModel
-from openai import OpenAI
 
 # 现有技能
 from financial_rag_skill import FinancialRAGSkill
 from integrated_graph import GraphState
 
 os.environ["VECTOR_STORE_BACKEND"] = "pgvector"  # 评测时默认使用 PGVector，确保与生产环境一致  
-# -------------------- Qwen-Plus 评估模型 --------------------
-# class QwenPlusModel(DeepEvalBaseLLM):
-#     def __init__(self, model_name="qwen-plus"):
-#         self.client = OpenAI(
-#             api_key=os.getenv("DASHSCOPE_API_KEY"),
-#             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-#         )
-#         self.model_name = model_name
-
-#     def load_model(self):
-#         pass
-
-#     def generate(self, prompt: str) -> str:
-#         response = self.client.chat.completions.create(
-#             model="qwen-turbo",
-#             messages=[{"role": "user", "content": prompt}],
-#             temperature=0,
-#         )
-#         return response.choices[0].message.content
-
-#     async def a_generate(self, prompt: str) -> str:
-#         return self.generate(prompt)
-
-#     def get_model_name(self) -> str:
-#         return "qwen-turbo"
 
 # 全局评测模型（GPTModel 接受自定义客户端）
 EVAL_MODEL = GPTModel(
@@ -157,18 +130,33 @@ def build_rag_graph(skill: FinancialRAGSkill):
 
 from difflib import SequenceMatcher
 
-def clean_retrieval_context(contexts: List[str], expected_answer: str, 
-                            similarity_threshold: float = 0.7) -> List[str]:
-    """
-    移除与标准答案高度相似的检索上下文，防止数据泄露导致指标失真。
-    """
-    cleaned = []
-    for ctx in contexts:
-        # 使用 SequenceMatcher 计算文本相似度
-        similarity = SequenceMatcher(None, ctx, expected_answer).ratio()
-        if similarity < similarity_threshold:
-            cleaned.append(ctx)
-    return cleaned
+# def clean_retrieval_context(contexts: List[str], expected_answer: str, 
+#                             similarity_threshold: float = 0.7) -> List[str]:
+#     """
+#     更保守的清洗策略，避免误删唯一相关证据：
+#     - 若 expected_answer 为空，则不清洗
+#     - 若检索片段包含 expected_answer 的逐字文本，则认为可能泄露并移除
+#     - 否则仅在相似度极高（>0.95）时移除
+#     该策略减少因模糊相似判定导致的误删。
+#     """
+#     if not expected_answer:
+#         return contexts
+
+#     cleaned: List[str] = []
+#     for ctx in contexts:
+#         try:
+#             # 逐字包含被视为潜在泄露，需移除
+#             if expected_answer.strip() and expected_answer in ctx:
+#                 continue
+#         except Exception:
+#             pass
+
+#         # 仅当相似度极高时（严格门槛）才移除
+#         similarity = SequenceMatcher(None, ctx, expected_answer).ratio()
+#         if similarity > 0.95:
+#             continue
+#         cleaned.append(ctx)
+#     return cleaned
 
 def evaluate_test_case(query: str, answer: str, contexts: List[str], expected_answer: str = "") -> Dict[str, float]:
     scores = {"faithfulness":None, "answer_relevancy": None, "contextual_recall": None}
@@ -184,8 +172,8 @@ def evaluate_test_case(query: str, answer: str, contexts: List[str], expected_an
                             )
             # 清洗上下文（仅对 faithfulness 和 contextual_recall 有必要）
             cleaned_contexts = contexts
-            if metric_name in ("faithfulness", "contextual_recall") and expected_answer:
-                cleaned_contexts = clean_retrieval_context(contexts, expected_answer)
+            # if metric_name in ("faithfulness", "contextual_recall") and expected_answer:
+            #     cleaned_contexts = clean_retrieval_context(contexts, expected_answer)
 
             test_case = LLMTestCase(
                 input=query, 

@@ -5,6 +5,7 @@ Day30 核心交付物
 # financial_rag_skill.py 最顶部
 import sys
 import asyncio
+import threading
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -36,14 +37,15 @@ load_dotenv()
 from vector_store_interface import create_vector_store
 from hybrid_retriever import HybridRetriever, create_bm25_retriever
 from langchain_core.documents import Document
-
+from config import get_embedding_model_path, get_vector_size
 # -------------------- 配置 --------------------
 # 请确保已设置环境变量 DASHSCOPE_API_KEY
 QWEN_API_KEY = os.getenv("DASHSCOPE_API_KEY", "your-dashscope-api-key")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "data", "finance_qa.txt")
 PERSIST_DIR = os.path.join(BASE_DIR, "chroma_db")
-MODEL_PATH = os.path.join(BASE_DIR, "models","text2vec-base-chinese","Jerry0", "text2vec-base-chinese")
+MODEL_PATH = get_embedding_model_path()
+VECTOR_SIZE = get_vector_size() 
 
 # ==================== 1. 元数据定义 ====================
 @dataclass
@@ -137,7 +139,9 @@ class ResourceManager:
         self._retriever = None
         self._llm = None
         self._loaded = False
-
+        self._lock = threading.Lock()
+        # 默认使用纯向量检索器（安全基线）
+        self.retrieval_mode = os.getenv("RETRIEVAL_MODE", "vector").lower()
         # 资源配置
         self.chunk_size = 300
         self.chunk_overlap = 50
@@ -154,103 +158,84 @@ class ResourceManager:
         print(f"💾 [延迟加载] 初始化向量库（后端: {self._backend}）...")
         print(f"🔍 PERSIST_DIR: {PERSIST_DIR}")
         print(f"📁 目录是否存在: {Path(PERSIST_DIR).exists()}")
-        # Embedding
-        self._embedding = HuggingFaceEmbeddings(
-            model_name=self.embedding_model_name,
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True}
-        )
-        # 使用抽象层工厂创建向量库
-        self._vectorstore = create_vector_store(
-            embedding_model=self._embedding,
-            config={
-                "backend": self._backend,
-                "collection_name": "finance_qa",
-                "persist_directory": PERSIST_DIR,
-                # pgvector 相关配置（仅在 backend=pgvector 时生效）
-                "table_name": "finance_knowledge",
-                "vector_size": 384,
-            },
-        )
+        with self._lock:
+            # 第二次检查（加锁后），防止多个线程同时通过第一次检查
+            # Embedding
+            self._embedding = HuggingFaceEmbeddings(
+                model_name=self.embedding_model_name,
+                model_kwargs={"device": "cpu"},
+                encode_kwargs={"normalize_embeddings": True}
+            )
+            # 使用抽象层工厂创建向量库
+            self._vectorstore = create_vector_store(
+                embedding_model=self._embedding,
+                config={
+                    "backend": self._backend,
+                    "collection_name": "finance_qa",
+                    "persist_directory": PERSIST_DIR,
+                    # pgvector 相关配置（仅在 backend=pgvector 时生效）
+                    "table_name": "finance_knowledge",
+                    "vector_size": VECTOR_SIZE,
+                },
+            )
 
-        # 如果向量库为空（新创建），则从文档源重建索引
-        # 简单判：若为 Chroma 且目录不存在，或 PGVectorStore 表为空，则插入数据
-        # if self._backend == "chroma" and not Path(PERSIST_DIR).exists():
-        #     self._ingest_documents()
+            # 如果向量库为空（新创建），则从文档源重建索引
+            # 简单判：若为 Chroma 且目录不存在，或 PGVectorStore 表为空，则插入数据
+            # if self._backend == "chroma" and not Path(PERSIST_DIR).exists():
+            #     self._ingest_documents()
 
-        if self._backend == "chroma":
-            if not Path(PERSIST_DIR).exists():
-                raise FileNotFoundError(
-                    f"向量库目录 {PERSIST_DIR} 不存在，请先运行 update_vectordb.py"
+            if self._backend == "chroma":
+                if not Path(PERSIST_DIR).exists():
+                    raise FileNotFoundError(
+                        f"向量库目录 {PERSIST_DIR} 不存在，请先运行 update_vectordb.py"
+                    )
+                self._vectorstore = Chroma(
+                    persist_directory=PERSIST_DIR,
+                    embedding_function=self._embedding,
+                    collection_name="finance_qa"
                 )
-            self._vectorstore = Chroma(
-                persist_directory=PERSIST_DIR,
-                embedding_function=self._embedding,
-                collection_name="finance_qa"
+
+            elif self._backend == "pgvector":
+                # 尝试查询一条数据，若失败则重建
+                try:
+                    self._vectorstore.similarity_search("test", k=1)
+                except Exception:
+                    self._ingest_documents()
+
+
+            if self.retrieval_mode == "hybrid":
+            
+                # ── 新增：构建 BM25 检索器 ──────────────────────
+                bm25_docs = self._load_bm25_documents()
+                bm25_retriever = create_bm25_retriever(bm25_docs, k=2)
+
+                # ── 创建混合检索器 ─────────────────────────────
+                self._hybrid_retriever = HybridRetriever(
+                    vector_retriever=self._retriever ,
+                    bm25_retriever=bm25_retriever,
+                    fusion_strategy="rrf",   # 默认 RRF，可配置
+                    k=self.search_k,
+                    fetch_k=10,              # 扩大候选池
+                )
+
+                # 将混合检索器赋值给 self._retriever，供 RAG 链使用
+                self._retriever = self._hybrid_retriever
+            else:
+                # 检索器
+                self._retriever = self._vectorstore.as_retriever(
+                    search_kwargs={"k": self.search_k}
+                )
+            # LLM (Qwen-plus, 使用 OpenAI 兼容模式)
+            print("🧠 [延迟加载] 正在连接 Qwen-plus 模型...")
+            self._llm = ChatOpenAI(
+                model="qwen-plus",
+                temperature=0,
+                openai_api_key=QWEN_API_KEY,
+                openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
             )
 
-        elif self._backend == "pgvector":
-            # 尝试查询一条数据，若失败则重建
-            try:
-                self._vectorstore.similarity_search("test", k=1)
-            except Exception:
-                self._ingest_documents()
-
-        """# 向量库（若已持久化则加载，否则重建）
-        if Path(PERSIST_DIR).exists():
-           
-            self._vectorstore = Chroma(
-                persist_directory=PERSIST_DIR,
-                embedding_function=self._embedding,
-                collection_name="finance_qa"
-            )
-        else:
-            # 从原始文档重建
-            loader = TextLoader(DATA_FILE, encoding="utf-8")
-            docs = loader.load()
-            splitter = RecursiveCharacterTextSplitter(
-                chunk_size=self.chunk_size,
-                chunk_overlap=self.chunk_overlap
-            )
-            chunks = splitter.split_documents(docs)
-            self._vectorstore = Chroma.from_documents(
-                documents=chunks,
-                embedding=self._embedding,
-                persist_directory=PERSIST_DIR,
-                collection_name="finance_qa"
-            )
-"""
-        # 检索器
-        self._retriever = self._vectorstore.as_retriever(
-            search_kwargs={"k": self.search_k}
-        )
-        # ── 新增：构建 BM25 检索器 ──────────────────────
-        bm25_docs = self._load_bm25_documents()
-        bm25_retriever = create_bm25_retriever(bm25_docs, k=self.search_k)
-
-        # ── 创建混合检索器 ─────────────────────────────
-        self._hybrid_retriever = HybridRetriever(
-            vector_retriever=self._retriever ,
-            bm25_retriever=bm25_retriever,
-            fusion_strategy="rrf",   # 默认 RRF，可配置
-            k=self.search_k,
-            fetch_k=20,              # 扩大候选池
-        )
-
-        # 将混合检索器赋值给 self._retriever，供 RAG 链使用
-        self._retriever = self._hybrid_retriever
-
-        # LLM (Qwen-plus, 使用 OpenAI 兼容模式)
-        print("🧠 [延迟加载] 正在连接 Qwen-plus 模型...")
-        self._llm = ChatOpenAI(
-            model="qwen-plus",
-            temperature=0,
-            openai_api_key=QWEN_API_KEY,
-            openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
-        )
-
-        self._loaded = True
-        print("✅ 所有重资源加载完成,混合检索器已就绪 (向量 + BM25)")
+            self._loaded = True
+            print("✅ 所有重资源加载完成,混合检索器已就绪 (向量 + BM25)")
 
     def _ingest_documents(self):
         """从原始文档构建向量索引"""
@@ -279,6 +264,8 @@ class ResourceManager:
             for item in qa_list:
                 query = item.get("query") or item.get("question", "")
                 answer = item.get("answer", "")
+                if len(answer) < 10:   # 过滤过短、可能无意义的答案
+                    continue
                 if query and answer:
                     # 将问答拼接为文档，让 BM25 能匹配问题和答案中的关键词
                     content = f"问题：{query}\n答案：{answer}"
@@ -426,24 +413,7 @@ class FinancialRAGSkill:
             response = self.resource_mgr.llm.invoke(messages)
             return {"input": user_input, "answer": response.content, "context": []}
 
-# ==================== 5. 测试验证 ====================
-# if __name__ == "__main__":
-#     # 测试昨天 MVP 的 4 个问题
-#     skill = FinancialRAGSkill()
-#     test_questions = [
-#         "商业银行的资本充足率要求是多少？",
-#         "LPR是什么？它和房贷有什么关系？",
-#         "个人购汇的年度额度限制是什么？",
-#         "股票交易有哪些限制？",  # 预期拒答
-#     ]
-#     print("=" * 60)
-#     print("金融 RAG Skill 测试运行 (模型: qwen-plus)")
-#     print("=" * 60)
-#     for q in test_questions:
-#         print(f"\n📝 问: {q}")
-#         answer = skill.run(q)
-#         print(f"🤖 答: {answer}")
-#         print("-" * 60)
+
 if __name__ == "__main__":
     skill = FinancialRAGSkill()
     query = "金融机构开展客户尽职调查的法定情形"

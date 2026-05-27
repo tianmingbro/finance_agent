@@ -1,91 +1,71 @@
 """
-compare_retrievers.py
-对比原向量检索器和混合检索器对相同问题的 top-3 结果
+test_end_to_end_conversation.py
+Day40 交付物：从提问到评测的完整对话流测试
 """
 import os
-import yaml
-from pathlib import Path
-from langchain_core.documents import Document
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_chroma import Chroma
+from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.memory import MemorySaver
+from langchain.agents import create_agent
+from tools import financial_qa, evaluate_answer
+DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
+BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
-# 导入混合检索相关
-from hybrid_retriever import HybridRetriever, create_bm25_retriever
-from financial_rag_skill import ResourceManager  # 若 ResourceManager 已更新则直接使用
-from config import get_embedding_model_path, get_vector_size
-
-CHROMA_DIR = "./chroma_db"
-EMBEDDING_MODEL = get_embedding_model_path()
-VECTOR_SIZE = get_vector_size()
-
-def get_embedding():
-    return HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
+def run_conversation():
+    # 1. 创建 Agent（使用 MemorySaver 存储会话）
+    checkpointer = MemorySaver()
+    llm = ChatOpenAI(
+        model="qwen-plus",
+        temperature=0,
+        openai_api_key=DASHSCOPE_API_KEY,
+        openai_api_base=BASE_URL,
     )
 
-def load_bm25_docs():
-    """加载 BM25 索引文档（与 ResourceManager 中的逻辑保持一致）"""
-    docs = []
-    qa_path = Path("data/final_qa_dataset.yaml")
-    if qa_path.exists():
-        with open(qa_path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-        qa_list = data if isinstance(data, list) else data.get("final_qa_dataset", [])
-        for item in qa_list:
-            q = item.get("query") or item.get("question", "")
-            a = item.get("answer", "")
-            if q and a:
-                content = f"问题：{q}\n答案：{a}"
-                docs.append(Document(page_content=content, metadata={"source": "qa_dataset"}))
-    return docs
-
-def compare_queries():
-    # 1. 向量检索器
-    embedding = get_embedding()
-    vectorstore = Chroma(
-        persist_directory=CHROMA_DIR,
-        embedding_function=embedding,
-        collection_name="finance_qa",
-    )
-    vector_retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-
-    # 2. BM25 检索器
-    bm25_docs = load_bm25_docs()
-    bm25_retriever = create_bm25_retriever(bm25_docs, k=3)
-
-    # 3. 混合检索器
-    hybrid_retriever = HybridRetriever(
-        vector_retriever=vector_retriever,
-        bm25_retriever=bm25_retriever,
-        fusion_strategy="rrf",
-        k=3,
-        fetch_k=20,
+    agent = create_agent(
+        model=llm,
+        tools=[financial_qa, evaluate_answer],
+        system_prompt=(
+            "你是专业的金融法规助手。"
+            "当用户询问金融法规问题时，使用 financial_qa 工具获取准确信息。"
+            "当用户要求评测某段回答时，使用 evaluate_answer 工具进行评估。"
+            "对于无关闲聊，请直接友好回复。"
+        ),
+        checkpointer=checkpointer,
     )
 
-    test_queries = [
-        "存款保险最高偿付限额是多少？",
-        "个人外汇便利化额度是多少？",
-        "商业银行的核心一级资本充足率要求？",
-        "反洗钱法规定的客户尽职调查是什么？",
-    ]
+    # 配置会话 ID，用于保持同一线程
+    config = {"configurable": {"thread_id": "conversation-1"}}
 
-    for query in test_queries:
-        print(f"\n{'='*60}")
-        print(f"❓ 查询: {query}")
+    # 2. 第一轮：用户提问
+    print("=" * 60)
+    print("👤 用户: 资本充足率的要求是多少？")
+    result1 = agent.invoke(
+        {"messages": [{"role": "user", "content": "资本充足率的要求是多少？"}]},
+        config
+    )
+    for msg in result1["messages"]:
+        print(msg.pretty_repr())  # 显示每条消息的关键信息
 
-        # 向量检索 top-3
-        vec_docs = vector_retriever.invoke(query)
-        print("\n--- 向量检索 Top-3 ---")
-        for i, doc in enumerate(vec_docs[:3], 1):
-            print(f"  [{i}] {doc.page_content[:100]}...")
+    # 3. 第二轮：用户要求评测上一个回答
+    #    Agent 会从对话历史中获取上一轮的回答，并调用 evaluate_answer 工具
+    print("\n" + "=" * 60)
+    print("👤 用户: 请帮我评测一下你刚才给出的回答是否忠实？")
+    result2 = agent.invoke(
+        {"messages": [{"role": "user", "content": "请帮我评测一下你刚才给出的回答是否忠实？"}]},
+        config
+    )
+    for msg in result2["messages"]:
+        print(msg.pretty_repr())
 
-        # 混合检索 top-3
-        hyb_docs = hybrid_retriever.get_relevant_documents(query)
-        print("\n--- 混合检索 Top-3 ---")
-        for i, doc in enumerate(hyb_docs[:3], 1):
-            print(f"  [{i}] {doc.page_content[:100]}...")
+    # 4. 第三轮：查看最终回复
+    final_messages = result2["messages"]
+    if final_messages:
+        last_ai = [m for m in final_messages if m.type == "ai"]
+        if last_ai:
+            print("\n🎯 最终 AI 回复:")
+            print(last_ai[-1].content)
 
 if __name__ == "__main__":
-    compare_queries()
+    # 确保 API Key 已设置
+    if not os.environ.get("DASHSCOPE_API_KEY"):
+        raise RuntimeError("请设置 DASHSCOPE_API_KEY 环境变量")
+    run_conversation()

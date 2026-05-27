@@ -62,8 +62,8 @@ class HybridRetriever(BaseRetriever):
     _bm25_retriever: Any = PrivateAttr(default=None)
 
     fusion_strategy: str = Field(default="rrf")
-    vector_weight: float = Field(default=0.5, ge=0.0, le=1.0)
-    bm25_weight: float = Field(default=0.5, ge=0.0, le=1.0)
+    vector_weight: float = Field(default=0.85, ge=0.0, le=1.0)
+    bm25_weight: float = Field(default=0.15, ge=0.0, le=1.0)
     k: int = Field(default=4, ge=1)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
