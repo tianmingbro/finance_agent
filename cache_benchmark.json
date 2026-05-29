@@ -1,0 +1,592 @@
+{
+  "benchmark_date": "2026-05-28 13:43:52",
+  "test_queries": [
+    "商业银行的核心一级资本充足率要求是多少？",
+    "存款保险最高偿付限额是多少？",
+    "个人每年便利化购汇额度是多少？",
+    "2025年1年期LPR最新报价是多少？",
+    "什么是贷款市场报价利率（LPR）？",
+    "资本充足率不达标会有什么后果？",
+    "反洗钱法规定金融机构应履行哪些义务？",
+    "系统重要性银行有哪些附加资本要求？",
+    "存款保险条例的立法目的是什么？",
+    "个人外汇业务中经常项目与资本项目的区别是什么？"
+  ],
+  "modes": {
+    "none": {
+      "runs": [
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 1,
+          "time_seconds": 10.0966,
+          "cache_hit": false
+        },
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 2,
+          "time_seconds": 9.6687,
+          "cache_hit": false
+        },
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 3,
+          "time_seconds": 13.4466,
+          "cache_hit": false
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 1,
+          "time_seconds": 11.0088,
+          "cache_hit": false
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 2,
+          "time_seconds": 10.2304,
+          "cache_hit": false
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 3,
+          "time_seconds": 9.9819,
+          "cache_hit": false
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 1,
+          "time_seconds": 12.9539,
+          "cache_hit": false
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 2,
+          "time_seconds": 12.0898,
+          "cache_hit": false
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 3,
+          "time_seconds": 10.8595,
+          "cache_hit": false
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 1,
+          "time_seconds": 9.2419,
+          "cache_hit": false
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 2,
+          "time_seconds": 10.565,
+          "cache_hit": false
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 3,
+          "time_seconds": 8.786,
+          "cache_hit": false
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 1,
+          "time_seconds": 22.272,
+          "cache_hit": false
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 2,
+          "time_seconds": 21.1519,
+          "cache_hit": false
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 3,
+          "time_seconds": 21.8691,
+          "cache_hit": false
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 1,
+          "time_seconds": 21.0925,
+          "cache_hit": false
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 2,
+          "time_seconds": 17.8161,
+          "cache_hit": false
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 3,
+          "time_seconds": 17.8387,
+          "cache_hit": false
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 1,
+          "time_seconds": 23.4254,
+          "cache_hit": false
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 2,
+          "time_seconds": 20.8223,
+          "cache_hit": false
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 3,
+          "time_seconds": 23.3948,
+          "cache_hit": false
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 1,
+          "time_seconds": 33.4077,
+          "cache_hit": false
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 2,
+          "time_seconds": 33.5449,
+          "cache_hit": false
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 3,
+          "time_seconds": 33.3885,
+          "cache_hit": false
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 1,
+          "time_seconds": 10.0902,
+          "cache_hit": false
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 2,
+          "time_seconds": 10.0667,
+          "cache_hit": false
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 3,
+          "time_seconds": 10.0161,
+          "cache_hit": false
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 1,
+          "time_seconds": 22.3814,
+          "cache_hit": false
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 2,
+          "time_seconds": 22.5159,
+          "cache_hit": false
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 3,
+          "time_seconds": 22.4156,
+          "cache_hit": false
+        }
+      ],
+      "total_time_seconds": 516.439,
+      "total_llm_calls": 30,
+      "estimated_cost_usd": 0.06
+    },
+    "exact": {
+      "runs": [
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 1,
+          "time_seconds": 9.1222,
+          "cache_hit": false
+        },
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 2,
+          "time_seconds": 0.002,
+          "cache_hit": true
+        },
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 3,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 1,
+          "time_seconds": 7.6018,
+          "cache_hit": false
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 2,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 3,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 1,
+          "time_seconds": 10.9197,
+          "cache_hit": false
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 2,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 3,
+          "time_seconds": 0.0015,
+          "cache_hit": true
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 1,
+          "time_seconds": 9.9546,
+          "cache_hit": false
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 2,
+          "time_seconds": 0.003,
+          "cache_hit": true
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 3,
+          "time_seconds": 0.002,
+          "cache_hit": true
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 1,
+          "time_seconds": 17.3614,
+          "cache_hit": false
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 2,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 3,
+          "time_seconds": 0.002,
+          "cache_hit": true
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 1,
+          "time_seconds": 17.7941,
+          "cache_hit": false
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 2,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 3,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 1,
+          "time_seconds": 23.3661,
+          "cache_hit": false
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 2,
+          "time_seconds": 0.003,
+          "cache_hit": true
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 3,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 1,
+          "time_seconds": 33.4485,
+          "cache_hit": false
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 2,
+          "time_seconds": 0.002,
+          "cache_hit": true
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 3,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 1,
+          "time_seconds": 10.0287,
+          "cache_hit": false
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 2,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 3,
+          "time_seconds": 0.002,
+          "cache_hit": true
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 1,
+          "time_seconds": 22.8181,
+          "cache_hit": false
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 2,
+          "time_seconds": 0.001,
+          "cache_hit": true
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 3,
+          "time_seconds": 0.003,
+          "cache_hit": true
+        }
+      ],
+      "total_time_seconds": 162.447,
+      "total_llm_calls": 10,
+      "estimated_cost_usd": 0.02
+    },
+    "semantic": {
+      "runs": [
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 1,
+          "time_seconds": 10.2477,
+          "cache_hit": false
+        },
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 2,
+          "time_seconds": 0.1,
+          "cache_hit": true
+        },
+        {
+          "query": "商业银行的核心一级资本充足率要求是多少？",
+          "attempt": 3,
+          "time_seconds": 0.103,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 1,
+          "time_seconds": 0.1011,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 2,
+          "time_seconds": 0.0987,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险最高偿付限额是多少？",
+          "attempt": 3,
+          "time_seconds": 0.097,
+          "cache_hit": true
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 1,
+          "time_seconds": 0.0878,
+          "cache_hit": true
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 2,
+          "time_seconds": 0.0965,
+          "cache_hit": true
+        },
+        {
+          "query": "个人每年便利化购汇额度是多少？",
+          "attempt": 3,
+          "time_seconds": 0.097,
+          "cache_hit": true
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 1,
+          "time_seconds": 0.099,
+          "cache_hit": true
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 2,
+          "time_seconds": 0.1011,
+          "cache_hit": true
+        },
+        {
+          "query": "2025年1年期LPR最新报价是多少？",
+          "attempt": 3,
+          "time_seconds": 0.1013,
+          "cache_hit": true
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 1,
+          "time_seconds": 0.0892,
+          "cache_hit": true
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 2,
+          "time_seconds": 0.1018,
+          "cache_hit": true
+        },
+        {
+          "query": "什么是贷款市场报价利率（LPR）？",
+          "attempt": 3,
+          "time_seconds": 0.0936,
+          "cache_hit": true
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 1,
+          "time_seconds": 0.0911,
+          "cache_hit": true
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 2,
+          "time_seconds": 0.0863,
+          "cache_hit": true
+        },
+        {
+          "query": "资本充足率不达标会有什么后果？",
+          "attempt": 3,
+          "time_seconds": 0.089,
+          "cache_hit": true
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 1,
+          "time_seconds": 0.092,
+          "cache_hit": true
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 2,
+          "time_seconds": 0.089,
+          "cache_hit": true
+        },
+        {
+          "query": "反洗钱法规定金融机构应履行哪些义务？",
+          "attempt": 3,
+          "time_seconds": 0.0892,
+          "cache_hit": true
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 1,
+          "time_seconds": 0.0865,
+          "cache_hit": true
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 2,
+          "time_seconds": 0.09,
+          "cache_hit": true
+        },
+        {
+          "query": "系统重要性银行有哪些附加资本要求？",
+          "attempt": 3,
+          "time_seconds": 0.0893,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 1,
+          "time_seconds": 0.0928,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 2,
+          "time_seconds": 0.09,
+          "cache_hit": true
+        },
+        {
+          "query": "存款保险条例的立法目的是什么？",
+          "attempt": 3,
+          "time_seconds": 0.0885,
+          "cache_hit": true
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 1,
+          "time_seconds": 0.0862,
+          "cache_hit": true
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 2,
+          "time_seconds": 0.0868,
+          "cache_hit": true
+        },
+        {
+          "query": "个人外汇业务中经常项目与资本项目的区别是什么？",
+          "attempt": 3,
+          "time_seconds": 0.0851,
+          "cache_hit": true
+        }
+      ],
+      "total_time_seconds": 12.947,
+      "total_llm_calls": 1,
+      "estimated_cost_usd": 0.002
+    }
+  },
+  "comparison": {
+    "exact_vs_none": {
+      "time_saved_seconds": 353.992,
+      "time_saved_percent": 68.5,
+      "cost_saved_usd": 0.04,
+      "total_llm_calls": 10
+    },
+    "semantic_vs_none": {
+      "time_saved_seconds": 503.492,
+      "time_saved_percent": 97.5,
+      "cost_saved_usd": 0.058,
+      "total_llm_calls": 1
+    }
+  }
+}

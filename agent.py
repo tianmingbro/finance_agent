@@ -8,7 +8,7 @@ from typing import Optional
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
-from tools import financial_qa, evaluate_answer
+from tools import financial_qa, evaluate_answer, _get_financial_skill
 
 DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -30,6 +30,7 @@ def build_agent(checkpointer=None, use_sqlite: bool = False, db_path: str = "che
     Returns:
         编译后的 Agent（CompiledStateGraph）
     """
+
     if checkpointer is None:
         if use_sqlite:
             from langgraph.checkpoint.sqlite import SqliteSaver
@@ -38,6 +39,8 @@ def build_agent(checkpointer=None, use_sqlite: bool = False, db_path: str = "che
         else:
             checkpointer = MemorySaver()
             logger.info("使用 MemorySaver 内存记忆（重启后丢失）")
+
+    _get_financial_skill()  # 内部会调用 load_resources()，设置全局 LLM 缓存
 
     llm = ChatOpenAI(
         model="qwen-plus",
@@ -61,6 +64,7 @@ def build_agent(checkpointer=None, use_sqlite: bool = False, db_path: str = "che
             "若无法获取，则请用户提供待评测的回答。"
             "3. 对于涉及违法、绕过监管或危害金融安全的请求，你必须明确拒绝，不调用任何工具。"
             "4. 对于无关闲聊，请直接友好回复，不调用任何工具。"
+
         ),
         checkpointer=checkpointer,
     )

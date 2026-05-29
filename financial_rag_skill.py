@@ -3,6 +3,7 @@
 Day30 核心交付物
 """
 # financial_rag_skill.py 最顶部
+import logging
 import sys
 import asyncio
 import threading
@@ -37,7 +38,10 @@ load_dotenv()
 from vector_store_interface import create_vector_store
 from hybrid_retriever import HybridRetriever, create_bm25_retriever
 from langchain_core.documents import Document
+from caching_manager import CachingManager
 from config import get_embedding_model_path, get_vector_size
+logger = logging.getLogger(__name__)
+
 # -------------------- 配置 --------------------
 # 请确保已设置环境变量 DASHSCOPE_API_KEY
 QWEN_API_KEY = os.getenv("DASHSCOPE_API_KEY", "your-dashscope-api-key")
@@ -152,6 +156,12 @@ class ResourceManager:
         self._hybrid_retriever = None
 
     def load_resources(self):
+        # 在原有缓存初始化代码前增加开关
+        if os.getenv("DISABLE_CACHE") != "1":
+            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            self._cache_mgr = CachingManager(...)
+            self._cache_mgr.enable_llm_cache()
+            self._embedding = self._cache_mgr.enable_embedding_cache()
         """首次调用时加载所有重资源，后续直接返回缓存"""
         if self._loaded:
             return
@@ -234,9 +244,26 @@ class ResourceManager:
                 openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
             )
 
-            self._loaded = True
-            print("✅ 所有重资源加载完成,混合检索器已就绪 (向量 + BM25)")
+             # ── 缓存层初始化（新增） ─────────────────────
+            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            cache_mode = os.getenv("CACHE_MODE", "semantic")  # 或 "exact"
 
+            self._cache_mgr = CachingManager(
+                redis_url=redis_url,
+                embedding_model=self._embedding,      # 原始的 HuggingFaceEmbeddings
+                mode=cache_mode,
+                ttl=3600,                             # 1 小时
+            )
+            # 启用 LLM 缓存 —— 之后所有 ChatOpenAI 调用都会走缓存
+            self._cache_mgr.enable_llm_cache()
+
+            # 将 Embedding 替换为带缓存的版本 —— 之后 embed_query / embed_documents
+            # 会先查 Redis，命中则直接返回向量，不再重复计算
+            self._embedding = self._cache_mgr.enable_embedding_cache()
+
+            self._loaded = True
+            logger.info("✅ 缓存层已启用 (mode=%s, redis=%s)", cache_mode, redis_url)
+            print("✅ 所有重资源加载完成,混合检索器已就绪 (向量 + BM25)")
     def _ingest_documents(self):
         """从原始文档构建向量索引"""
         loader = TextLoader(DATA_FILE, encoding="utf-8")

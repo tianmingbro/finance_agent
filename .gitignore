@@ -70,3 +70,15 @@ all-MiniLM-L6-v2/
 # 但通常不在项目内，如果在项目内则加上：
 .huggingface/
 huggingface/
+
+# 归档的实验与学习文件（保留本地，不提交）
+archive/
+
+# 日志文件（保留本地，不提交）
+*.log
+logs/
+
+# 覆盖率报告（本地查看，不提交）
+htmlcov/
+.coverage
+coverage.xml

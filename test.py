@@ -1,71 +1,29 @@
-"""
-test_end_to_end_conversation.py
-Day40 交付物：从提问到评测的完整对话流测试
-"""
-import os
-from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.memory import MemorySaver
-from langchain.agents import create_agent
-from tools import financial_qa, evaluate_answer
-DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
-BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+import json
 
-def run_conversation():
-    # 1. 创建 Agent（使用 MemorySaver 存储会话）
-    checkpointer = MemorySaver()
-    llm = ChatOpenAI(
-        model="qwen-plus",
-        temperature=0,
-        openai_api_key=DASHSCOPE_API_KEY,
-        openai_api_base=BASE_URL,
-    )
+def load_report(path):
+    with open(path,'r',encoding='utf-8') as f:
+        return json.load(f)
 
-    agent = create_agent(
-        model=llm,
-        tools=[financial_qa, evaluate_answer],
-        system_prompt=(
-            "你是专业的金融法规助手。"
-            "当用户询问金融法规问题时，使用 financial_qa 工具获取准确信息。"
-            "当用户要求评测某段回答时，使用 evaluate_answer 工具进行评估。"
-            "对于无关闲聊，请直接友好回复。"
-        ),
-        checkpointer=checkpointer,
-    )
+base = load_report("data/eval_report_nocache.json")
+cached = load_report("data/eval_report_cache.json")
 
-    # 配置会话 ID，用于保持同一线程
-    config = {"configurable": {"thread_id": "conversation-1"}}
+print("=" * 50)
+print("        引入缓存前后对比")
+print("=" * 50)
 
-    # 2. 第一轮：用户提问
-    print("=" * 60)
-    print("👤 用户: 资本充足率的要求是多少？")
-    result1 = agent.invoke(
-        {"messages": [{"role": "user", "content": "资本充足率的要求是多少？"}]},
-        config
-    )
-    for msg in result1["messages"]:
-        print(msg.pretty_repr())  # 显示每条消息的关键信息
+# 1. 核心质量指标（不应有明显变化）
+for m in ["faithfulness", "answer_relevancy", "contextual_recall"]:
+    base_mean = base["metrics_summary"][m]["mean"]
+    cache_mean = cached["metrics_summary"][m]["mean"]
+    diff = (cache_mean - base_mean) * 100
+    print(f"{m:25s}: {base_mean:.4f} → {cache_mean:.4f}  ({diff:+.1f}%)")
 
-    # 3. 第二轮：用户要求评测上一个回答
-    #    Agent 会从对话历史中获取上一轮的回答，并调用 evaluate_answer 工具
-    print("\n" + "=" * 60)
-    print("👤 用户: 请帮我评测一下你刚才给出的回答是否忠实？")
-    result2 = agent.invoke(
-        {"messages": [{"role": "user", "content": "请帮我评测一下你刚才给出的回答是否忠实？"}]},
-        config
-    )
-    for msg in result2["messages"]:
-        print(msg.pretty_repr())
+# 2. API 调用次数（需在评测脚本中嵌入计数器，这里假设已记录）
+base_calls = base.get("total_llm_calls", "未统计")
+cache_calls = cached.get("total_llm_calls", "未统计")
+print(f"\nLLM API 调用次数: 基线 {base_calls} → 缓存 {cache_calls}")
 
-    # 4. 第三轮：查看最终回复
-    final_messages = result2["messages"]
-    if final_messages:
-        last_ai = [m for m in final_messages if m.type == "ai"]
-        if last_ai:
-            print("\n🎯 最终 AI 回复:")
-            print(last_ai[-1].content)
-
-if __name__ == "__main__":
-    # 确保 API Key 已设置
-    if not os.environ.get("DASHSCOPE_API_KEY"):
-        raise RuntimeError("请设置 DASHSCOPE_API_KEY 环境变量")
-    run_conversation()
+# 3. 端到端耗时（需在评测脚本中记录，此处仅示例）
+base_time = base.get("total_time_seconds", "未统计")
+cache_time = cached.get("total_time_seconds", "未统计")
+print(f"总耗时(秒): 基线 {base_time} → 缓存 {cache_time}")

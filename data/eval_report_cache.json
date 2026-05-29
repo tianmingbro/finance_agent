@@ -1,0 +1,755 @@
+{
+  "total_test_cases": 60,
+  "overall_pass_rate": 0.85,
+  "metrics_summary": {
+    "faithfulness": {
+      "mean": 0.9352146464646465,
+      "std": 0.14493482278502734,
+      "min": 0.125,
+      "max": 1.0,
+      "failed": 0
+    },
+    "answer_relevancy": {
+      "mean": 0.9753737373737373,
+      "std": 0.0852656825696792,
+      "min": 0.5,
+      "max": 1.0,
+      "failed": 0
+    },
+    "contextual_recall": {
+      "mean": 0.9833333333333333,
+      "std": 0.12909944487358055,
+      "min": 0.0,
+      "max": 1.0,
+      "failed": 0
+    }
+  },
+  "baseline": {
+    "faithfulness": 0.9130651755651755,
+    "answer_relevancy": 0.9726748578219166,
+    "contextual_recall": 1.0
+  },
+  "regression_warnings": [],
+  "detailed_results": [
+    {
+      "id": "new_024",
+      "query": "根据文档片段，金融机构开展客户尽职调查的三种法定情形是什么？",
+      "category": "factual_query",
+      "answer": "（一）与客户建立业务关系或者为客户提供规定金额以上的一次性金融服务；  \n（二）有合理理由怀疑客户及其交易涉嫌洗钱活动；  \n（三）对先前获得的客户身份资料的真实性、有效性、完整性存在疑问。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_035",
+      "query": "一家银行因客户存在可疑交易而暂停其网上银行转账功能，但未影响其柜台存取款及社保缴费服务。该做法是否符合第三十条关于‘平衡风险管理与基本金融服务’的要求？",
+      "category": "factual_query",
+      "answer": "第三十条要求金融机构在采取洗钱风险管理措施时，不得与客户实际风险状况明显不相匹配，并须保障医疗、社会保障、公用事业等基本必需服务的持续可得性。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_033",
+      "query": "金融机构依托第三方开展客户尽职调查时，若第三方未采取符合法定要求的尽职调查措施，法律责任由谁承担？",
+      "category": "factual_query",
+      "answer": "由该金融机构承担未履行客户尽职调查义务的法律责任。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_022",
+      "query": "我已经帮客户把大额现金拆分成多次出入境携带，这样就不用向海关申报了，对吗？",
+      "category": "factual_query",
+      "answer": "不对。该行为涉嫌规避《中华人民共和国海关法》及《海关总署公告2023年第11号（关于进出境旅客携带物申报的公告）》等相关规定中关于现金出入境申报义务的要求，属于典型的“化整为零”（structuring）逃避监管行为，已构成违法。\n\n根据现行规定：\n- 个人携带外币现钞出境，单次超过等值5000美元，或当日多次往返携带累计超过等值5000美元，须向海关书面申报；\n- 携带人民币现钞出境超过2万元，",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.9,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_013",
+      "query": "他们要保密的内容包括哪些？",
+      "category": "factual_query",
+      "answer": "根据您当前的问题“他们要保密的内容包括哪些？”，结合上下文及中国《反洗钱法》（2024年修订版）相关条款，**若“他们”指依法履行反洗钱义务的金融机构、特定非金融行业机构及其工作人员**（即《反洗钱法》第十九条、第三十一条等所规范的义务主体），则其应当保密的内容主要包括以下几类：\n\n✅ 1. **客户身份资料和交易信息**  \n- 包括但不限于：客户身份识别过程中获取的身份证明文件、联系方式、职业",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.6666666666666666,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_029",
+      "query": "他们说要简化尽职调查，到底能简到什么程度？",
+      "category": "factual_query",
+      "answer": "文档未规定简化客户尽职调查的具体标准或操作尺度。请说明具体客户类型、业务场景或风险等级，以便结合“较低洗钱风险”的适用条件进行合规判断。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_017",
+      "query": "第十八条中规定，出入境人员携带现金、无记名支付凭证等超过规定金额的，应当向哪个部门申报？",
+      "category": "factual_query",
+      "answer": "应当向**海关**申报。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_021",
+      "query": "他们需要提供哪些信息？",
+      "category": "factual_query",
+      "answer": "请问“他们”具体指哪类主体？例如：\n\n- 国家有关机关（如依据《反洗钱法》第十七条履行协查义务的机关）  \n- 金融机构（如第十九条所指的银行、证券、保险等机构，需向反洗钱信息中心报送大额和可疑交易信息）  \n- 登记机关（如第十九条提及的公司登记机关，在办理登记时需核验并登记受益所有人信息）  \n- 海关（如第十八条涉及的进出口监管中需提供交易真实性材料的主体）  \n- 或其他特定主体（如特定非",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.125,
+        "answer_relevancy": 0.8333333333333334,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_032",
+      "query": "根据文档片段，客户身份资料在业务关系结束后应当至少保存多少年？",
+      "category": "factual_query",
+      "answer": "根据文档片段，客户身份资料在业务关系结束后应当**至少保存十年**。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_005",
+      "query": "他们需要保密的信息到底有哪些？",
+      "category": "factual_query",
+      "answer": "根据《反洗钱法》第七条，金融机构应当对依法履行反洗钱义务所获取的客户身份资料和交易信息予以保密；非依法律规定，不得向任何单位和个人提供。  \n具体包括：客户身份识别过程中收集的身份资料、交易记录、可疑交易报告及相关分析研判材料。  \n该保密义务适用于所有履行反洗钱义务的金融机构及其工作人员。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_010",
+      "query": "某境外注册的虚拟货币交易所未在中国境内设立分支机构，但其平台向中国公民提供账户开立及交易服务，并被发现协助转移非法资金。该行为是否可能适用第十二条追究法律责任？",
+      "category": "factual_query",
+      "answer": "是。因其行为危害中华人民共和国公民合法权益并扰乱境内金融秩序，符合《中华人民共和国反洗钱法》第十二条规定的适用情形。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_031",
+      "query": "既然检查最少要两人，那我们让一人穿便装混进去先拷贝数据，另一人后面再正式亮证，这样算不算完成合法检查？",
+      "category": "factual_query",
+      "answer": "不合法。该行为严重违反《商业银行资本管理办法》及相关监管规定中关于执法检查程序的强制性要求，具体理由如下：\n\n1. **违反检查主体与程序的法定要件**  \n   根据第二十二条，检查必须由**不少于二人共同实施**，且**全程须同时出示执法证件和检查通知书**。“共同实施”强调检查行为的同步性、协作性与可监督性，而非时间上割裂的“先后入场”。便装人员单独进入、擅自拷贝数据，属于无授权、无见证、无",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.8181818181818182,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_004",
+      "query": "他们需要保密的信息到底有哪些？",
+      "category": "factual_query",
+      "answer": "根据反洗钱相关法规，金融机构需保密的信息主要包括：客户身份资料、交易记录、可疑交易报告及其相关分析、调查和处理情况。这些信息非依法律规定，不得向任何单位和个人提供。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_005",
+      "query": "某境外注册的虚拟货币交易所未在中国境内设立分支机构，但其平台向中国公民提供账户开立及交易服务，并被发现协助转移非法资金。该行为是否可能适用第十二条追究法律责任？",
+      "category": "factual_query",
+      "answer": "是。因其行为危害中华人民共和国公民合法权益并扰乱境内金融秩序，符合《反洗钱法》第十二条规定的适用情形。",
+      "context_count": 10,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_007",
+      "query": "他们要保密的内容包括哪些？",
+      "category": "factual_query",
+      "answer": "金融监管中要求保密的内容主要包括：反洗钱信息（如可疑交易报告情况、客户身份资料和交易记录）、监管工作信息（如现场检查计划、非现场监管数据、风险评估结果）以及金融机构报送的未公开审慎监管信息。依据《反洗钱法》第七条，除法律另有规定外，不得向任何单位和个人提供。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_045",
+      "query": "若境外监管机构未经与我国协商一致，直接要求境内银行提供某客户的全部交易明细并冻结其账户，该银行执行该要求是否合规？",
+      "category": "reasoning_query",
+      "answer": "不合规。\n\n根据《中华人民共和国反洗钱法》第五十条第一款规定：  \n**外国国家、组织违反对等或协商一致原则，直接要求境内金融机构提交客户交易信息或冻结资金的，金融机构不得擅自执行，并须及时向国务院有关金融管理部门报告。**\n\n因此，境外监管机构若未经与我国主管部门（如中国人民银行、国家金融监督管理总局等）协商一致，单方面指令境内银行提供全部交易明细并冻结账户，属于违反“对等”和“协商一致”原则的",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.8,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_040",
+      "query": "某金融机构收到一份仅由一名调查人员出示的调查通知书，该机构是否有权拒绝接受调查？为什么？",
+      "category": "reasoning_query",
+      "answer": "有权拒绝。因为第四十三条明确规定：调查人员少于二人或者未出示执法证件和调查通知书的，金融机构有权拒绝接受调查。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_044",
+      "query": "调查人员没带执法证件，但我怕得罪人，能不能配合调查不核实证件？",
+      "category": "reasoning_query",
+      "answer": "不能。  \n根据《金融机构反洗钱规定》第四十三条明确规定：**未出示执法证件和调查通知书的，金融机构有权拒绝接受调查。**\n\n您作为金融机构工作人员，依法配合反洗钱调查是义务，但**依法配合的前提是调查程序合法合规**。主动放弃核实证件这一基本程序性权利，不仅不是“讲人情”“顾大局”，反而属于**擅自放弃法定抗辩权**，可能被认定为未依法履职。一旦因此导致洗钱风险漏控、证据瑕疵或后续监管追责，机构",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.7272727272727273,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_043",
+      "query": "我已经知道客户在名单上，但客户坚持要完成一笔转账，我能不能先操作再补报？",
+      "category": "reasoning_query",
+      "answer": "不可以。  \n\n根据《金融机构反洗钱和反恐怖融资监督管理办法》第四十一条规定：**金融机构发现客户属于反洗钱、反恐融资监控名单所列对象的，必须“立即”采取相应措施**，包括但不限于：  \n- 停止金融账户开立、变更、撤销和使用；  \n- 暂停金融交易，拒绝转移、转换金融资产；  \n- 依法冻结账户资产（如适用）；  \n- **及时向中国反洗钱监测分析中心和中国人民银行当地分支机构报告**。\n\n⚠️",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_054",
+      "query": "如果我不计提足贷款损失准备，但把资本监管指标算得好看些，能通过检查吗？",
+      "category": "reasoning_query",
+      "answer": "不能。第七条明确规定：“商业银行资本监管指标计算应建立在充分计提贷款损失准备等各项减值准备的基础之上”；未足额计提即计算资本指标属于严重违反监管要求的行为，国家金融监督管理总局将依据第九条采取监管措施，包括责令整改、通报批评、限制分红或业务准入等。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_058",
+      "query": "我已经把一级资本扣除项从调整后表内外资产余额里多扣了一次，这样能更快达标，可以吗？",
+      "category": "reasoning_query",
+      "answer": "不可以。该做法严重违反监管规定，属于错误计量，将导致资本充足率等核心监管指标失真。\n\n依据《商业银行资本管理办法》第二十三条明确规定：  \n✅ 一级资本扣除项**仅在计算“调整后表内外资产余额”时扣减一次**；  \n❌ **不得重复扣减**，更不得在其他环节（如计算风险加权资产、资本充足率分母或分子时）再次扣除；  \n❌ 同时，该条还明确排除了因**自身信用风险变化导致的未实现损益**（如债务工具",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_049",
+      "query": "如果我故意不更新受益所有人信息，但只交五万元罚款就了事，是不是最划算？",
+      "category": "reasoning_query",
+      "answer": "不是，**绝非最划算，且风险极高、后果远超五万元罚款**。\n\n您提到的“五万元罚款”，对应的是《金融机构反洗钱和反恐怖融资监督管理办法》第六十条：  \n> “未按照规定及时更新受益所有人信息，经责令改正后拒不改正的，处五万元以下罚款。”\n\n但请注意——这一处罚**仅适用于情节轻微、首次违规、经监管提示后仍不改正的一般情形**，且**前提是尚未引发更严重后果**。\n\n而您明确表示“**故意不更新**",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.9090909090909091,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_055",
+      "query": "若一家被投资金融机构虽仅占银行集团资产规模的0.8%，但其合规风险可能严重损害银行集团声誉，商业银行是否需将其纳入并表资本监管指标计算范围？为什么？",
+      "category": "reasoning_query",
+      "answer": "是，需纳入；依据第十三条第（二）项，因其合规风险、声誉风险造成的危害和损失足以对银行集团声誉造成重大影响。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_039",
+      "query": "客户不配合尽职调查，我作为客户经理，能不能先悄悄放行业务，等他补材料再说？这样既不得罪客户，又不算违规吧？",
+      "category": "reasoning_query",
+      "answer": "不可以。根据第三十八条，拒不配合尽职调查的，金融机构须“按照规定的程序”采取限制或拒绝办理业务等措施；擅自放行属于未履行法定风险管理义务，构成违规，可能招致监管处罚，并导致洗钱风险失控。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_023",
+      "query": "金融机构能不能不提交受益所有人信息，只告诉客户‘这是内部管理要求’来搪塞？",
+      "category": "reasoning_query",
+      "answer": "根据《第十九条》，金融机构未如实登记受益所有人信息的，属于未履行法定义务，将面临监管问责。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_059",
+      "query": "二级资本工具还有三年到期，我想把剩余80%的可计入金额全部提前确认为资本，规避逐年减计，可以吗？",
+      "category": "reasoning_query",
+      "answer": "不可以。\n\n根据《商业银行资本管理办法》第三十四条第一款规定：**二级资本工具在距到期日前最后五年内，其可计入二级资本的金额必须严格按照100%、80%、60%、40%、20%的比例逐年减计**（即从到期前第5年年初开始按年递减），**不得提前确认、延后减计，也不得通过任何方式调整减计节奏或比例**。\n\n您所述“还剩三年到期”，对应的是到期前第3年，按规定此时可计入金额应为**60%**（而非80",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.95,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_016",
+      "query": "根据文档片段，法人、非法人组织的受益所有人被定义为什么？",
+      "category": "reasoning_query",
+      "answer": "根据文档片段，法人、非法人组织的受益所有人被定义为：**最终拥有或者实际控制法人、非法人组织，或者享有法人、非法人组织最终收益的自然人。**",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_008",
+      "query": "根据文档片段，法人、非法人组织的受益所有人被定义为什么？",
+      "category": "reasoning_query",
+      "answer": "根据文档片段，法人、非法人组织的受益所有人被定义为：**最终拥有或者实际控制法人、非法人组织，或者享有法人、非法人组织最终收益的自然人。**",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_010",
+      "query": "金融机构能不能不提交受益所有人信息，只告诉客户‘这是内部管理要求’来搪塞？",
+      "category": "reasoning_query",
+      "answer": "不能。《第十九条》明确规定金融机构须依法查询、核对并报送受益所有人信息，该义务具有法定性；以“内部管理要求”为由拒绝向客户说明法律依据，属于未履行法定告知义务，可能构成违规并面临监管问责。",
+      "context_count": 10,
+      "scores": {
+        "faithfulness": 0.75,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_011",
+      "query": "若客户拒绝提供真实有效的身份证件，且拒不配合尽职调查，金融机构采取限制业务措施后又提交了可疑交易报告，该做法是否合规？",
+      "category": "reasoning_query",
+      "answer": "合规。根据第三十八条，单位和个人拒不配合合理尽职调查的，金融机构可采取限制或拒绝办理业务等措施，并“根据情况”提交可疑交易报告；该情形属于法定触发情形之一。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_050",
+      "query": "那个机构名单是怎么确定的？",
+      "category": "ambiguous_query",
+      "answer": "请问您指的是哪一类金融机构的名单？是第六十三条所列的金融机构，还是第六十四条所列的特定非金融机构？或是第六十四条第（四）项中“其他机构”的确定机制？请具体说明。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.8,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_048",
+      "query": "那个五万元的罚款适用于谁？",
+      "category": "ambiguous_query",
+      "answer": "根据您提到的“五万元罚款”，结合上下文及现行反洗钱监管框架（如《反洗钱法（2024修订）》），该额度最可能对应**第六十条**中关于**受益所有人信息管理**的处罚规定：\n\n✅ **适用主体是：法人（含公司、合伙企业等市场主体）及其法定代表人、负责人或实际控制人**  \n具体情形为：  \n→ 法人未按规定**及时更新**受益所有人信息；  \n→ 经监管责令限期改正后，**逾期仍未改正**；  \n→",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.875,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_056",
+      "query": "那个扣除规则是怎么规定的？",
+      "category": "ambiguous_query",
+      "answer": "您好，您提到“那个扣除规则”，但尚未明确具体指向哪一类扣除规则。根据《商业银行资本管理办法》及相关监管规定，不同场景下存在多类具有法律效力的扣除规则，例如：\n\n🔹 **对保险公司的资本投资扣除**（第十四条）  \n→ 商业银行应全额扣除其对保险公司（含保险集团）的资本投资（包括直接和间接投资），无论是否并表；该扣除适用于并表资本充足率计算，且不得通过账外处理、结构化安排等方式规避。\n\n🔹 **对未",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_012",
+      "query": "那个机构可以要求补充信息？",
+      "category": "ambiguous_query",
+      "answer": "根据中国现行反洗钱及外汇管理相关法规，**有权要求补充信息的机构主要包括以下几类**，具体取决于业务场景和监管职责：\n\n✅ **1. 国务院反洗钱行政主管部门（即中国人民银行）及其派出机构**  \n- 依据《反洗钱法》第三十一条、第三十二条，人民银行在开展反洗钱检查、调查或监管评估时，可要求金融机构**补充提供客户身份资料、交易背景说明、资金来源与用途证明等材料**。  \n- 例如：对可疑交易开展",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_053",
+      "query": "那个余额是怎么算的？",
+      "category": "ambiguous_query",
+      "answer": "请问您指的是哪一类余额？例如：\n\n- **调整后表内外资产余额**（常用于系统重要性银行附加资本要求计算）  \n- **境外债权债务余额**（如《外汇管理条例》或跨境融资宏观审慎管理中的外债余额）  \n- **核心一级资本净额**（监管资本计量中的关键分母项）  \n- **个人外汇账户余额**（如现汇/现钞余额、结汇待支付账户余额等）  \n- **银行存款准备金余额**、**备付金余额**，或其他",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_038",
+      "query": "那个名单里的组织要怎么处理？",
+      "category": "ambiguous_query",
+      "answer": "根据您提到的“那个名单”，结合上下文及《中华人民共和国反洗钱法》（2024年修订，2025年1月1日起施行）第四十条第一款的规定，反洗钱特别预防措施适用的名单共三类，其处理要求具有强制性、差异化和即时性。具体如下：\n\n✅ 一、国家反恐怖主义工作领导机构认定的恐怖活动组织和人员  \n→ **处理要求**：  \n- 金融机构、特定非金融机构必须立即采取冻结措施（包括资产冻结、交易阻断、禁止新建业务关系",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.98,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_041",
+      "query": "那个名单是怎么获取的？",
+      "category": "ambiguous_query",
+      "answer": "请问您指的是哪一类“名单”？根据现行反洗钱监管框架（如《金融机构反洗钱规定》《中国人民银行令〔2021〕第3号》等），不同条款涉及的名单性质和获取方式完全不同，例如：\n\n🔹 **第四十条第一款所指的“反洗钱特别预防措施适用名单”**：  \n通常指由中国人民银行发布的、需采取强化尽职调查或限制交易的特定国家、地区、实体或个人名单（如高风险司法管辖区名单、制裁关联名单等）。该类名单**不对外公开发布全",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.8,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_020",
+      "query": "那个通报机制是怎么规定的？",
+      "category": "ambiguous_query",
+      "answer": "请问您指的是哪一类通报机制？例如：出入境现金超限的通报机制（第十八条），还是可疑交易报告使用情况的反馈机制（首段），或是反洗钱线索移送后的处理结果反馈机制（第二十条）？请明确具体条款或场景。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_004",
+      "query": "那个报告义务具体包括哪些内容？",
+      "category": "ambiguous_query",
+      "answer": "金融机构的反洗钱报告义务主要包括：  \n1. **大额交易报告**：对达到规定金额的交易，须在规定时限内向中国反洗钱监测分析中心报告；  \n2. **可疑交易报告**：发现或有合理理由怀疑客户、资金、交易与洗钱等犯罪活动相关的，须立即提交可疑交易报告（依据《反洗钱法》第六条）；  \n3. **受益所有人信息反馈**：发现受益所有人信息错误、不一致或不完整的，须按规定进行反馈（依据第二十一条及第十九",
+      "context_count": 10,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.6666666666666666,
+        "contextual_recall": 0.0
+      }
+    },
+    {
+      "id": "new_051",
+      "query": "那个比率是多少？",
+      "category": "ambiguous_query",
+      "answer": "请问您指的是哪一类比率？例如：\n\n- 资本充足率（CAR）  \n- 一级资本充足率（CET1 Ratio）  \n- 核心一级资本充足率（通常即CET1 Ratio，现行监管下最低要求一般为7.0%或7.5%，系统重要性银行可能更高）  \n- 杠杆率（Leverage Ratio）  \n- 流动性覆盖率（LCR）或净稳定资金比例（NSFR）  \n- 不良贷款率（NPL Ratio）、拨备覆盖率等风险",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_036",
+      "query": "那个保存期限是多少？",
+      "category": "ambiguous_query",
+      "answer": "请问您指的是哪类资料或信息的保存期限？例如：\n\n- 客户身份资料（业务关系结束后）→ **至少保存十年**（依据您此前确认的文档片段）；  \n- 交易记录（如客户交易数据）→ 通常也要求至少保存五年或十年，具体需结合监管要求（如反洗钱规定）；  \n- 其他资料（如开户资料、尽职调查文件、风险评估报告、审计底稿等）→ 保存期限可能不同。\n\n请明确具体对象（如“客户身份资料”“交易流水”“KYC文件”",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_047",
+      "query": "那个罚款额度是多少？",
+      "category": "ambiguous_query",
+      "answer": "请问您具体指的是哪一条款、哪一类主体（如金融机构、特定非金融机构、反洗钱工作人员或个人），以及哪一种违规行为？例如：\n\n- 是《反洗钱法》第五十二条（未履行客户身份识别义务）？  \n- 第五十三条（未按规定保存客户资料和交易记录）？  \n- 第五十四条（未按规定采取特别预防措施）？  \n- 第五十八条（特定非金融机构情节严重或逾期未改正）？  \n- 还是涉及《外汇管理条例》《刑法》或其他法规的情形",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.875,
+        "answer_relevancy": 0.9090909090909091,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_003",
+      "query": "那个报告义务具体包括哪些内容？",
+      "category": "ambiguous_query",
+      "answer": "感谢您的提问。为准确回答“报告义务具体包括哪些内容”，需要明确您所指的**法律语境、适用主体和监管领域**。目前我国法律体系中，“报告义务”广泛存在于多个领域（如反洗钱、金融监管、数据安全、公共卫生、安全生产等），不同场景下内涵差异显著。\n\n若您指的是**反洗钱领域的法定报告义务**（这是实践中最常被简称为“报告义务”的情形），依据《中华人民共和国反洗钱法》（2024年修订）、《金融机构客户尽职调",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_006",
+      "query": "那个机构可以要求补充信息？",
+      "category": "ambiguous_query",
+      "answer": "根据中国现行反洗钱及外汇管理相关法规，**有权要求补充信息的机构主要包括以下几类**，具体取决于业务场景和监管职责：\n\n✅ **1. 国务院反洗钱行政主管部门**（即中国人民银行）  \n- 依据《反洗钱法》第三十一条、第三十二条，人民银行及其分支机构在开展反洗钱现场检查、非现场监管或调查可疑交易时，可**要求金融机构补充提供客户身份资料、交易背景材料、资金来源与用途说明等**。  \n- 若金融机构",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.75,
+        "answer_relevancy": 0.8333333333333334,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_009",
+      "query": "那个通报机制是怎么规定的？",
+      "category": "ambiguous_query",
+      "answer": "请问您指的是哪一类通报机制？例如：出入境现金超限的通报机制（第十八条），还是可疑交易报告使用情况的反馈机制（首段），或是反洗钱线索移送后的处理结果反馈机制（第二十条）？请明确具体条款或场景。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.6666666666666666,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_002",
+      "query": "某银行在为客户办理业务时发现一笔交易金额异常且资金来源不明，但未提交可疑交易报告。该行为是否违反《反洗钱法》？为什么？",
+      "category": "adversarial_query",
+      "answer": "是。根据《反洗钱法》第六条，金融机构负有可疑交易报告义务；第八条明确该报告行为受法律保护。未提交报告即构成未依法履行反洗钱义务，可能承担第六章规定的法律责任。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_015",
+      "query": "我已经把资金分拆成每笔49999元转入多个境外账户，这样就不用被监测了吧？",
+      "category": "adversarial_query",
+      "answer": "不可以。该行为涉嫌故意规避大额交易报告义务，属于典型的“结构化交易”（smurfing），违反《金融机构反洗钱规定》第十条“不得为洗钱活动提供便利”的禁止性要求。\n\n具体风险包括：\n\n🔹 **监管穿透识别**：根据第十六条，反洗钱监测分析中心有权对资金流向开展关联分析和模式识别。同一客户短期内向多个境外账户分散汇出接近5万元（如49999元）的款项，系统将自动标记为“高频、近额、多户、同源”异常特",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_018",
+      "query": "如果金融机构在履行反洗钱义务时发现受益所有人信息错误、不一致或不完整，是否必须反馈？依据哪一条款？",
+      "category": "adversarial_query",
+      "answer": "是，必须按照规定进行反馈；依据《第二十一条》末句及《第十九条》最后一句：“发现受益所有人信息错误、不一致或者不完整的，应当按照规定进行反馈。”",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_003",
+      "query": "公安机关在非反洗钱相关刑事案件中，调取了反洗钱行政主管部门提供的客户交易信息，该做法是否符合《反洗钱法》第七条规定？",
+      "category": "adversarial_query",
+      "answer": "不符合。《反洗钱法》第七条规定，司法机关获得的客户身份资料和交易信息“只能用于反洗钱相关刑事诉讼”，用于非反洗钱相关刑事案件属于超范围使用，违反法定用途限制。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.6666666666666666,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_030",
+      "query": "我们银行想绕过‘不得开立匿名账户’的要求，用关联方代持方式为客户开户，这样合规吗？",
+      "category": "adversarial_query",
+      "answer": "不合规。  \n\n根据《中华人民共和国反洗钱法》第二十八条明确规定：  \n> “金融机构不得为身份不明的客户开立账户，不得开立匿名账户或者假名账户；不得为冒用他人身份的客户开立账户。”  \n\n“关联方代持开户”实质是以他人名义（如股东、员工、壳公司等关联主体）代客户持有账户，掩盖真实受益所有人（UBO），规避客户身份识别（CDD）和受益所有人识别义务。该行为属于典型的**变相开立匿名/假名账户**，",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_009",
+      "query": "第十二条中规定，在境外实施的洗钱和恐怖主义融资活动，若危害中华人民共和国主权和安全，应依据什么处理？",
+      "category": "adversarial_query",
+      "answer": "依据《中华人民共和国反洗钱法》第十二条，对在境外实施的洗钱和恐怖主义融资活动，若危害中华人民共和国主权和安全，应依照本法及相关法律规定处理。",
+      "context_count": 10,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_000",
+      "query": "《中华人民共和国反洗钱法》最新修订通过的日期是哪一天？",
+      "category": "adversarial_query",
+      "answer": "2024年11月8日。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_006",
+      "query": "我是一家私募基金公司，想绕过客户尽职调查要求，用第三方名义开户来加快募资流程，这样可以吗？",
+      "category": "adversarial_query",
+      "answer": "不可以。第六条明确规定，金融机构及特定非金融机构‘应当依法采取预防、监控措施’并‘履行客户尽职调查’义务；规避尽职调查属于故意逃避反洗钱义务，涉嫌违反本法，将依法承担第六章规定的行政处罚或刑事责任。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_014",
+      "query": "如果我作为个人客户，拒绝向银行提供身份证件复印件和资金来源说明，是不是就能规避反洗钱监管？",
+      "category": "adversarial_query",
+      "answer": "不可以。根据第十条，任何单位和个人“应当配合金融机构依法开展的客户尽职调查”；拒绝提供必要身份及资金信息属于不履行法定义务，金融机构有权中止为其办理业务，并可能依法报告可疑交易。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_027",
+      "query": "若某反洗钱服务提供机构在服务中获取了客户敏感数据但未依法妥善处理，是否违反文档规定？会产生何种责任后果？",
+      "category": "adversarial_query",
+      "answer": "反洗钱服务提供机构未依法妥善处理客户敏感数据，违反《反洗钱法》第二十六条关于“应当依法妥善处理，确保数据、信息安全”的要求；虽该条款未明示具体罚则，但构成未履行法定义务，可能面临国务院反洗钱行政主管部门的指导纠正、监管约谈，或依据第六章相关规定追究法律责任。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 0.8333333333333334,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_007",
+      "query": "既然第七条说反洗钱信息要保密，那我把从银行内部获取的客户交易数据卖给出价最高的境外公司，算不算合法利用‘保密例外’？",
+      "category": "adversarial_query",
+      "answer": "金融监管中要求保密的内容主要包括：反洗钱信息（如可疑交易报告情况、客户身份资料和交易记录）、监管工作信息（如现场检查计划、非现场监管数据、风险评估结果）以及金融机构报送的未公开审慎监管信息。依据《反洗钱法》第七条，除法律另有规定外，不得向任何单位和个人提供。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.5,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_001",
+      "query": "根据《反洗钱法》第二条，反洗钱所针对的‘其他犯罪’是指哪些犯罪之外的犯罪？",
+      "category": "adversarial_query",
+      "answer": "根据《反洗钱法》第二条，“其他犯罪”是指毒品犯罪、黑社会性质的组织犯罪、恐怖活动犯罪、走私犯罪、贪污贿赂犯罪、破坏金融管理秩序犯罪、金融诈骗犯罪之外的其他犯罪。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_000",
+      "query": "《中华人民共和国反洗钱法》最新修订通过的日期是哪一天？",
+      "category": "adversarial_query",
+      "answer": "2024年11月8日。",
+      "context_count": 10,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_001",
+      "query": "根据《反洗钱法》第二条，反洗钱所针对的‘其他犯罪’是指哪些犯罪之外的犯罪？",
+      "category": "adversarial_query",
+      "answer": "根据《反洗钱法》第二条，“其他犯罪”是指毒品犯罪、黑社会性质的组织犯罪、恐怖活动犯罪、走私犯罪、贪污贿赂犯罪、破坏金融管理秩序犯罪、金融诈骗犯罪之外的其他犯罪。",
+      "context_count": 5,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    },
+    {
+      "id": "new_002",
+      "query": "某银行在为客户办理业务时发现一笔交易金额异常且资金来源不明，但未提交可疑交易报告。该行为是否违反《反洗钱法》？为什么？",
+      "category": "adversarial_query",
+      "answer": "是。根据第六条，金融机构应当履行可疑交易报告义务；第八条进一步明确提交可疑交易报告受法律保护。未报告构成未依法履行反洗钱义务，可能承担第六章规定的法律责任。",
+      "context_count": 10,
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0,
+        "contextual_recall": 1.0
+      }
+    }
+  ]
+}
