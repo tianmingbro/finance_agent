@@ -42,7 +42,7 @@ jobs:
       OPENAI_API_BASE: "https://dashscope.aliyuncs.com/compatible-mode/v1"
       REDIS_URL: "redis://redis:6379"
       PGVECTOR_CONNECTION_STRING: "postgresql+psycopg3://pgvector:pgvector@pgvector:5432/ai_rag"
-      VECTOR_BACKEND: chroma   # 默认使用 Chroma，也可切换为 pgvector
+      VECTOR_BACKEND: pgvector   # 默认使用 Chroma，也可切换为 pgvector
 
     steps:
       - name: Checkout code
@@ -51,7 +51,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.10"
 
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y libpq-dev
@@ -65,7 +65,7 @@ jobs:
       - name: Prepare knowledge base (if needed)
         run: |
           # 如果向量库需要预置数据，可运行数据导入脚本
-          python ingest_data.py --input data/source_docs --backend chroma || true
+          python archive/scripts/import_docs.py --input data/source_docs --backend chroma || true
 
       - name: Run tests with coverage
         run: |
