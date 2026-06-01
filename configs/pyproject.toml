@@ -1,0 +1,19 @@
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "tests/*",
+    "*/data_ingestion_v2.py",
+    "*/ingest_data.py",
+    "*/benchmark_cache.py",
+    "*/run_evaluation_pipeline.py",
+    "venv/*",
+    "*/__init__.py",
+    "*/integrated_graph.py",
+    "*/build_agent.py",
+    "*/test.py",
+    "*/run_eval_agent.py",
+    "venv/*",
+    "*/pgvector_prototype.py",
+    "*/instruction_loader.py",
+    "*/langgraph_dual_skill.py",
+]

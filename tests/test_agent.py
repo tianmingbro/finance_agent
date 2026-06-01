@@ -6,12 +6,13 @@ import pytest
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 
-from agent import build_agent
+from src.agent.agent import build_agent
 
 requires_api = pytest.mark.skipif(
     not os.environ.get("DASHSCOPE_API_KEY"),
     reason="请设置 DASHSCOPE_API_KEY 以运行集成测试"
 )
+
 
 @requires_api
 class TestAgentMemory:

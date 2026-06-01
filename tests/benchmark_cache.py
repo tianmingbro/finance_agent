@@ -18,7 +18,7 @@ from pydantic import PrivateAttr
 from langchain_core.globals import set_llm_cache
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
-from caching_manager import CachingManager
+from src.cache.caching_manager import CachingManager
 from config import get_embedding_model_path
 MODEL_PATH = get_embedding_model_path()
 # -------------------- 配置 --------------------
