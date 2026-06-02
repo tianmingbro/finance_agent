@@ -46,8 +46,9 @@ logger = logging.getLogger(__name__)
 # 请确保已设置环境变量 DASHSCOPE_API_KEY
 QWEN_API_KEY = os.getenv("DASHSCOPE_API_KEY", "your-dashscope-api-key")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, "data", "finance_qa.txt")
-PERSIST_DIR = os.path.join(BASE_DIR, "chroma_db")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
+DATA_FILE = os.path.join(PROJECT_ROOT, "data", "finance_qa.txt")
+PERSIST_DIR = os.path.join(PROJECT_ROOT, "chroma_db")
 MODEL_PATH = get_embedding_model_path()
 VECTOR_SIZE = get_vector_size() 
 
@@ -164,7 +165,7 @@ class ResourceManager:
         with self._lock:
             if self._loaded:
                 return
-            print(f"💾 [延迟加载] 初始化向量库（后端: {self._backend}）...")
+            logger.info("延迟加载 初始化向量库（后端: %s）...", self._backend)
             # 第二次检查（加锁后），防止多个线程同时通过第一次检查
             # Embedding
             self._embedding = HuggingFaceEmbeddings(
@@ -172,20 +173,7 @@ class ResourceManager:
                 model_kwargs={"device": "cpu"},
                 encode_kwargs={"normalize_embeddings": True}
             )
-            # 在原有缓存初始化代码前增加开关
-            if os.getenv("DISABLE_CACHE") != "1":
-                redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-                cache_mode = os.getenv("CACHE_MODE", "semantic")          # ← 定义变量
-                self._cache_mgr = CachingManager(
-                                redis_url=redis_url,
-                                embedding_model=self._embedding,
-                                mode=cache_mode,
-                                ttl=3600,
-                        )
-                self._cache_mgr.enable_llm_cache()
-                self._embedding = self._cache_mgr.enable_embedding_cache()
-                logger.info("缓存层已启用 (mode=%s, redis=%s)", cache_mode, redis_url)
-           
+
 
             if self._backend == "chroma":
                 
@@ -235,7 +223,7 @@ class ResourceManager:
                 # 检索器
                 self._retriever = vector_retriever
             # LLM (Qwen-plus, 使用 OpenAI 兼容模式)
-            print("🧠 [延迟加载] 正在连接 Qwen-plus 模型...")
+            logger.info("延迟加载 正在连接 Qwen-plus 模型...")
             self._llm = ChatOpenAI(
                 model="qwen-plus",
                 temperature=0,
@@ -243,26 +231,22 @@ class ResourceManager:
                 openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
             )
 
-             # ── 缓存层初始化（新增） ─────────────────────
-            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-            cache_mode = os.getenv("CACHE_MODE", "semantic")  # 或 "exact"
-
-            self._cache_mgr = CachingManager(
-                redis_url=redis_url,
-                embedding_model=self._embedding,      # 原始的 HuggingFaceEmbeddings
-                mode=cache_mode,
-                ttl=3600,                             # 1 小时
-            )
-            # 启用 LLM 缓存 —— 之后所有 ChatOpenAI 调用都会走缓存
-            self._cache_mgr.enable_llm_cache()
-
-            # 将 Embedding 替换为带缓存的版本 —— 之后 embed_query / embed_documents
-            # 会先查 Redis，命中则直接返回向量，不再重复计算
-            self._embedding = self._cache_mgr.enable_embedding_cache()
+             # ── 缓存层初始化（由 DISABLE_CACHE 控制） ──
+            if os.getenv("DISABLE_CACHE") != "1":
+                redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+                cache_mode = os.getenv("CACHE_MODE", "semantic")
+                self._cache_mgr = CachingManager(
+                    redis_url=redis_url,
+                    embedding_model=self._embedding,
+                    mode=cache_mode,
+                    ttl=3600,
+                )
+                self._cache_mgr.enable_llm_cache()
+                self._embedding = self._cache_mgr.enable_embedding_cache()
+                logger.info("✅ 缓存层已启用 (mode=%s, redis=%s)", cache_mode, redis_url)
 
             self._loaded = True
-            logger.info("✅ 缓存层已启用 (mode=%s, redis=%s)", cache_mode, redis_url)
-            print("✅ 所有重资源加载完成,混合检索器已就绪 (向量 + BM25)")
+            logger.info("所有重资源加载完成,混合检索器已就绪 (向量 + BM25)")
 
     def _ingest_documents(self):
         """从原始文档构建向量索引"""
@@ -273,7 +257,7 @@ class ResourceManager:
             chunk_overlap=self.chunk_overlap
         )
         chunks = splitter.split_documents(docs)
-        print(f"📝 正在将 {len(chunks)} 个切片写入 {self._backend}...")
+        logger.info("正在将 %d 个切片写入 %s...", len(chunks), self._backend)
         self._vectorstore.add_documents(chunks)
 
     def _load_bm25_documents(self) -> List[Document]:

@@ -238,7 +238,7 @@ class TestToolsBoundary:
     def test_financial_qa_empty_query(self, monkeypatch):
         from src.tools import financial_qa
         # 模拟底层 Skill 返回空答案
-        monkeypatch.setattr("tools._get_financial_skill", lambda: MagicMock(run_with_context=lambda q: {"answer": ""}))
+        monkeypatch.setattr("src.tools._get_financial_skill", lambda: MagicMock(run_with_context=lambda q: {"answer": ""}))
         res = financial_qa.invoke("")  # 空字符串
         assert isinstance(res, str)
 
@@ -249,7 +249,7 @@ class TestToolsBoundary:
         mock_report.metrics = []
         mock_report.overall_trust = "unknown"
         mock_runner.run.return_value = mock_report
-        monkeypatch.setattr("tools._get_eval_runner", lambda: mock_runner)
+        monkeypatch.setattr("src.tools._get_eval_runner", lambda: mock_runner)
         res = evaluate_answer.invoke({"query": "", "answer": ""})
         assert "忠实度" in res
 
@@ -284,7 +284,7 @@ from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 
 # ------------------- 工具层边界 -------------------
 class TestFinancialQABoundary:
-    @patch("tools._get_financial_skill")
+    @patch("src.tools._get_financial_skill")
     def test_extremely_long_query(self, mock_skill):
         """输入接近或超过 token 限制的超长问题，工具不应崩溃"""
         from src.tools import financial_qa
@@ -299,7 +299,7 @@ class TestFinancialQABoundary:
         assert isinstance(result, str)
         assert len(result) > 0
 
-    @patch("tools._get_financial_skill")
+    @patch("src.tools._get_financial_skill")
     def test_query_with_emoji_and_fullwidth_spaces(self, mock_skill):
         """包含 emoji 和全角空格的问题应正常处理"""
         from src.tools import financial_qa
@@ -313,7 +313,7 @@ class TestFinancialQABoundary:
 
 
 class TestEvaluateAnswerBoundary:
-    @patch("tools._get_eval_runner")
+    @patch("src.tools._get_eval_runner")
     def test_empty_answer_string(self, mock_runner):
         """待评测答案为 '' 时不应崩溃"""
         from src.tools import evaluate_answer
@@ -326,7 +326,7 @@ class TestEvaluateAnswerBoundary:
         assert isinstance(res, str)
         assert "忠实度" in res or "unknown" in res
 
-    @patch("tools._get_eval_runner")
+    @patch("src.tools._get_eval_runner")
     def test_empty_query_and_answer(self, mock_runner):
         """待评测的 query 和 answer 都为空"""
         from src.tools import evaluate_answer
@@ -338,7 +338,7 @@ class TestEvaluateAnswerBoundary:
         res = evaluate_answer.invoke({"query": "", "answer": ""})
         assert isinstance(res, str)
 
-    @patch("tools._get_eval_runner")
+    @patch("src.tools._get_eval_runner")
     def test_evaluate_with_fullwidth_chars(self, mock_runner):
         """query 和 answer 中包含全角字符、emoji"""
         from src.tools import evaluate_answer
@@ -392,7 +392,10 @@ class TestAgentAttackCharacters:
         messages = response["messages"]
         assert "<script>" not in messages[-1].content
 
-    @pytest.mark.skip(reason="create_agent 兼容性问题：KeyError 'model'，待 LangGraph 升级后修复")
+    @pytest.mark.skipif(
+        "DASHSCOPE_API_KEY" not in os.environ,
+        reason="需要 DASHSCOPE_API_KEY 进行真实 Agent 测试"
+    )
     def test_unicode_control_characters(self):
         """包含零宽字符、emoji、全角空格的输入不应破坏 Agent 流程"""
         from src.agent.agent import build_agent
@@ -411,7 +414,11 @@ class TestAgentAttackCharacters:
 
 
 class TestAgentConcurrentToolCalls:
-    @pytest.mark.skip(reason="create_agent 兼容性问题：KeyError 'model'，待 LangGraph 升级后修复")
+    @pytest.mark.skipif(
+        "DASHSCOPE_API_KEY" not in os.environ,
+        reason="需要 DASHSCOPE_API_KEY 进行真实 Agent 测试"
+    )
+    @pytest.mark.skip(reason="LangChain create_react_agent 内部错误处理报 NameError: logger，等待 LangChain 修复")
     def test_agent_state_consistency_after_multi_tool_calls(self):
         """连续多次调用工具，确保消息顺序和状态一致性"""
         from src.agent.agent import build_agent

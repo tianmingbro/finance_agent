@@ -5,10 +5,11 @@ import os
 import time
 import logging
 from typing import Optional
-from langchain.agents import create_agent,AgentState
+from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from src.tools import financial_qa, evaluate_answer, _get_financial_skill
+from mcp_client import get_finance_mcp_tools
 
 DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -18,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("agent")
 
 
-def build_agent(checkpointer=None, use_sqlite: bool = False, db_path: str = "checkpoints.db"):
+async def build_agent(checkpointer=None, use_sqlite: bool = False, db_path: str = "checkpoints.db"):
     """
     创建金融法规智能体实例。
 
@@ -48,16 +49,14 @@ def build_agent(checkpointer=None, use_sqlite: bool = False, db_path: str = "che
         openai_api_key=DASHSCOPE_API_KEY,
         openai_api_base=BASE_URL,
     )
-
-    # 包装工具以添加日志
-    logged_tools = [_wrap_with_logging(financial_qa), _wrap_with_logging(evaluate_answer)]
+    mcp_tools = await get_finance_mcp_tools()
 
     agent = create_agent(
         model=llm,
-        tools=logged_tools,
+        tools=mcp_tools,
         system_prompt=(
             "你是专业的金融法规助手。"
-            "1. 当用户询问金融法规问题时，你必须优先使用 financial_qa 工具获取准确答案。"
+            "1. 当用户询问金融法规问题时，你可以使用 search_finance_docs 工具检索相关法规文档，"
             "若工具调用失败，请诚实说明当前无法获取信息，不要编造任何内容。"
             "2. 当用户要求评测回答质量时，你必须使用 evaluate_answer 工具。"
             "如果用户未给出具体待评测文本，应从对话历史中提取上一轮金融回答；"

@@ -98,7 +98,7 @@ class EvalResourceManager:
         """首次调用时初始化 DeepEval 模型，后续复用"""
         if self._loaded:
             return
-        print("🧪 [延迟加载] 正在初始化 DeepEval 评估模型...")
+        logger.info("延迟加载 正在初始化 DeepEval 评估模型...")
         api_key = os.getenv("DASHSCOPE_API_KEY")
         if not api_key:
             raise RuntimeError("未找到 DASHSCOPE_API_KEY，无法初始化评测模型")
@@ -109,7 +109,7 @@ class EvalResourceManager:
             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
         )
         self._loaded = True
-        print("✅ DeepEval 评估资源就绪")
+        logger.info("DeepEval 评估资源就绪")
 
     def get_metric(self, metric_name: str, model: str = "qwen-plus",
                    threshold: float = 0.7) -> object:
@@ -213,7 +213,7 @@ class EvaluationRunner:
             query = "商业银行的资本充足率要求是多少？"
 
         # Step 2: 调用 RAG Skill
-        print(f"🔍 正在调用金融 RAG Skill 回答: {query}")
+        logger.info("正在调用金融 RAG Skill 回答: %s", query)
         rag_response = rag_skill(query)
 
         # Step 3: 确定指标
@@ -233,7 +233,7 @@ class EvaluationRunner:
                 retrieval_context=rag_response.get("context", []),
                 expected_output=rag_response.get("expected_output"),  # 可选
             )
-            print(f"📏 正在计算 {mname} ...")
+            logger.info("正在计算 %s ...", mname)
             metric.measure(test_case)
             results.append(MetricResult(
                 name=mname,
@@ -333,7 +333,7 @@ class AITestSkill:
                 }
             else:
                 # 兼容只返回字符串的旧版 Skill
-                print("⚠️ 当前 RAG Skill 仅返回文本，未提供检索上下文，评测可能不完整。")
+                logger.warning("当前 RAG Skill 仅返回文本，未提供检索上下文，评测可能不完整。")
                 return {
                     "input": query,
                     "answer": str(response),

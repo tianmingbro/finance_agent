@@ -92,7 +92,7 @@ def test_end_to_end_doc_to_answer(temp_doc_dir, chroma_dir, monkeypatch):
 
     # ---- 4. 覆盖 FinancialRAGSkill 的默认向量库路径 ----
     monkeypatch.setattr(
-        "financial_rag_skill.PERSIST_DIR", chroma_dir
+        "src.skill.financial_rag_skill.PERSIST_DIR", chroma_dir
     )
     # 也需要确保它使用相同的 collection name（默认是 "finance_qa"，这里改为 "test_e2e"）
     # 为了不修改源码，我们直接修改已导入模块中的常量或实例属性。

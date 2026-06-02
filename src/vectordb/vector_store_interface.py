@@ -88,7 +88,7 @@ def create_vector_store(
             persist_directory=persist_dir,
             collection_name=collection,
         )
-        print(f"📦 使用向量库后端: Chroma (persist: {persist_dir})")
+        logger.info("使用向量库后端: Chroma (persist: %s)", persist_dir)
 
     elif backend == "pgvector":
         # ─── PGVectorStore（生产预留）─────────────
@@ -118,7 +118,7 @@ def create_vector_store(
             table_name=table_name,
             embedding_service=embedding_model,
         )
-        print(f"📦 使用向量库后端: PGVectorStore (table: {table_name})")
+        logger.info("使用向量库后端: PGVectorStore (table: %s)", table_name)
 
     else:
         raise ValueError(f"不支持的向量库后端: {backend}")

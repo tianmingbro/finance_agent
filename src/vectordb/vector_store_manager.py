@@ -4,10 +4,16 @@ Day38 核心交付物：向量库管理器，支持 Chroma / PGVector 统一接�
 兼容：langchain v1.2 + langchain-chroma / langchain-postgres
 """
 import os
+import sys
+import asyncio
 import logging
 from pathlib import Path
 import time
 from typing import List, Optional, Dict, Any
+
+# Windows 兼容性：psycopg 在 Windows 上需要 SelectorEventLoop
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from langchain_core.documents import Document
 from langchain_core.vectorstores import VectorStoreRetriever
@@ -32,6 +38,7 @@ class VectorStoreManager:
         self.connection_string = connection_string
         self.embedding_model = embedding_model
         self.table_name = table_name
+        self.vector_size = vector_size
         # # 从 embedding 模型获取实际维度
         # test_embedding = self.embedding_model.embed_query("dimension test")
         # actual_dim = len(test_embedding)
@@ -68,8 +75,8 @@ class VectorStoreManager:
                 table_name=self.table_name,
                 vector_size=self.vector_size,
             )
-        except Exception:
-            pass  # 表已存在则忽略
+        except Exception as e:
+            logger.warning("init_vectorstore_table 异常（已忽略）: %s", e)
 
         self._store = PGVectorStore.create_sync(
             engine=self._engine,
@@ -96,9 +103,16 @@ class VectorStoreManager:
 
     def delete_collection(self):
         if self._engine:
-            self._engine._engine.execute(f"DROP TABLE IF EXISTS {self.table_name}")
+            from sqlalchemy import text as _text
+            async def _drop():
+                async with self._engine._pool.connect() as conn:
+                    await conn.execute(_text(f"DROP TABLE IF EXISTS {self.table_name}"))
+                    await conn.commit()
+                await self._engine._pool.dispose()
+            self._engine._run_as_sync(_drop())
             logger.info("已删除表 '%s'", self.table_name)
         self._store = None
+        self._engine = None
 
     def as_retriever(self, **kwargs) -> VectorStoreRetriever:
         return self._store.as_retriever(**kwargs)
