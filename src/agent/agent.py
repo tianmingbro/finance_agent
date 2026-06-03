@@ -8,8 +8,8 @@ from typing import Optional
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
-from src.tools import financial_qa, evaluate_answer, _get_financial_skill
-from mcp_client import get_finance_mcp_tools
+from src.tools import financial_qa, evaluate_answer, _get_financial_skill,rag_workflow_query
+from src.agent.mcp_client import get_finance_mcp_tools
 
 DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
@@ -50,10 +50,11 @@ async def build_agent(checkpointer=None, use_sqlite: bool = False, db_path: str 
         openai_api_base=BASE_URL,
     )
     mcp_tools = await get_finance_mcp_tools()
-
+    if isinstance(mcp_tools, list) and len(mcp_tools) == 1 and isinstance(mcp_tools[0], list):
+        mcp_tools = mcp_tools[0]    # 解开外层包装
     agent = create_agent(
         model=llm,
-        tools=mcp_tools,
+        tools=mcp_tools+[rag_workflow_query],
         system_prompt=(
             "你是专业的金融法规助手。"
             "1. 当用户询问金融法规问题时，你可以使用 search_finance_docs 工具检索相关法规文档，"

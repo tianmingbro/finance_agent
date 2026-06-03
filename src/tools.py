@@ -4,6 +4,7 @@ import logging
 from langchain_core.tools import tool
 from src.skill.financial_rag_skill import FinancialRAGSkill
 from src.skill.ai_test_skill import EvaluationRunner, EvalResourceManager
+from src.agent.workflow import rag_agent_workflow
 logger = logging.getLogger(__name__)
 
 _financial_skill = None
@@ -67,3 +68,13 @@ def evaluate_answer(query: str, answer: str) -> str:
     return (
     f"忠实度: {faith}, 答案相关性: {relevancy}, 综合信任等级: {trust}"
 )
+
+@tool
+def rag_workflow_query(query: str) -> str:
+    """
+    回答金融法规问题。内部调用 RAG 工作流：检索相关文档 → 生成答案。
+    输入：用户问题（字符串）
+    输出：基于法规文档的准确答案。
+    """
+    result = rag_agent_workflow.invoke({"query": query, "need_eval": False})
+    return result.get("answer", "系统无法回答该问题")

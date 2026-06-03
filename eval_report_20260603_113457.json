@@ -1,0 +1,820 @@
+{
+  "total_test_cases": 60,
+  "overall_pass_rate": 0.0,
+  "metrics_summary": {
+    "faithfulness": {
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "failed": 60
+    },
+    "answer_relevancy": {
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "failed": 60
+    },
+    "contextual_recall": {
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "failed": 60
+    }
+  },
+  "baseline": {
+    "faithfulness": 0.9130651755651755,
+    "answer_relevancy": 0.9726748578219166,
+    "contextual_recall": 1.0
+  },
+  "regression_warnings": [
+    "⚠️ faithfulness: 基线 0.913 → 当前 0.000 (下降 100.0%)",
+    "⚠️ answer_relevancy: 基线 0.973 → 当前 0.000 (下降 100.0%)",
+    "⚠️ contextual_recall: 基线 1.000 → 当前 0.000 (下降 100.0%)"
+  ],
+  "detailed_results": [
+    {
+      "id": "new_024",
+      "query": "根据文档片段，金融机构开展客户尽职调查的三种法定情形是什么？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_035",
+      "query": "一家银行因客户存在可疑交易而暂停其网上银行转账功能，但未影响其柜台存取款及社保缴费服务。该做法是否符合第三十条关于‘平衡风险管理与基本金融服务’的要求？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_033",
+      "query": "金融机构依托第三方开展客户尽职调查时，若第三方未采取符合法定要求的尽职调查措施，法律责任由谁承担？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_022",
+      "query": "我已经帮客户把大额现金拆分成多次出入境携带，这样就不用向海关申报了，对吗？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_013",
+      "query": "他们要保密的内容包括哪些？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_029",
+      "query": "他们说要简化尽职调查，到底能简到什么程度？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_017",
+      "query": "第十八条中规定，出入境人员携带现金、无记名支付凭证等超过规定金额的，应当向哪个部门申报？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_021",
+      "query": "他们需要提供哪些信息？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_032",
+      "query": "根据文档片段，客户身份资料在业务关系结束后应当至少保存多少年？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_005",
+      "query": "他们需要保密的信息到底有哪些？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_010",
+      "query": "某境外注册的虚拟货币交易所未在中国境内设立分支机构，但其平台向中国公民提供账户开立及交易服务，并被发现协助转移非法资金。该行为是否可能适用第十二条追究法律责任？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_031",
+      "query": "既然检查最少要两人，那我们让一人穿便装混进去先拷贝数据，另一人后面再正式亮证，这样算不算完成合法检查？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_004",
+      "query": "他们需要保密的信息到底有哪些？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_005",
+      "query": "某境外注册的虚拟货币交易所未在中国境内设立分支机构，但其平台向中国公民提供账户开立及交易服务，并被发现协助转移非法资金。该行为是否可能适用第十二条追究法律责任？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_007",
+      "query": "他们要保密的内容包括哪些？",
+      "category": "factual_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_045",
+      "query": "若境外监管机构未经与我国协商一致，直接要求境内银行提供某客户的全部交易明细并冻结其账户，该银行执行该要求是否合规？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_040",
+      "query": "某金融机构收到一份仅由一名调查人员出示的调查通知书，该机构是否有权拒绝接受调查？为什么？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_044",
+      "query": "调查人员没带执法证件，但我怕得罪人，能不能配合调查不核实证件？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_043",
+      "query": "我已经知道客户在名单上，但客户坚持要完成一笔转账，我能不能先操作再补报？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_054",
+      "query": "如果我不计提足贷款损失准备，但把资本监管指标算得好看些，能通过检查吗？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_058",
+      "query": "我已经把一级资本扣除项从调整后表内外资产余额里多扣了一次，这样能更快达标，可以吗？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_049",
+      "query": "如果我故意不更新受益所有人信息，但只交五万元罚款就了事，是不是最划算？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_055",
+      "query": "若一家被投资金融机构虽仅占银行集团资产规模的0.8%，但其合规风险可能严重损害银行集团声誉，商业银行是否需将其纳入并表资本监管指标计算范围？为什么？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_039",
+      "query": "客户不配合尽职调查，我作为客户经理，能不能先悄悄放行业务，等他补材料再说？这样既不得罪客户，又不算违规吧？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_023",
+      "query": "金融机构能不能不提交受益所有人信息，只告诉客户‘这是内部管理要求’来搪塞？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_059",
+      "query": "二级资本工具还有三年到期，我想把剩余80%的可计入金额全部提前确认为资本，规避逐年减计，可以吗？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_016",
+      "query": "根据文档片段，法人、非法人组织的受益所有人被定义为什么？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_008",
+      "query": "根据文档片段，法人、非法人组织的受益所有人被定义为什么？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_010",
+      "query": "金融机构能不能不提交受益所有人信息，只告诉客户‘这是内部管理要求’来搪塞？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_011",
+      "query": "若客户拒绝提供真实有效的身份证件，且拒不配合尽职调查，金融机构采取限制业务措施后又提交了可疑交易报告，该做法是否合规？",
+      "category": "reasoning_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_050",
+      "query": "那个机构名单是怎么确定的？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_048",
+      "query": "那个五万元的罚款适用于谁？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_056",
+      "query": "那个扣除规则是怎么规定的？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_012",
+      "query": "那个机构可以要求补充信息？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_053",
+      "query": "那个余额是怎么算的？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_038",
+      "query": "那个名单里的组织要怎么处理？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_041",
+      "query": "那个名单是怎么获取的？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_020",
+      "query": "那个通报机制是怎么规定的？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_004",
+      "query": "那个报告义务具体包括哪些内容？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_051",
+      "query": "那个比率是多少？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_036",
+      "query": "那个保存期限是多少？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_047",
+      "query": "那个罚款额度是多少？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_003",
+      "query": "那个报告义务具体包括哪些内容？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_006",
+      "query": "那个机构可以要求补充信息？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_009",
+      "query": "那个通报机制是怎么规定的？",
+      "category": "ambiguous_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_002",
+      "query": "某银行在为客户办理业务时发现一笔交易金额异常且资金来源不明，但未提交可疑交易报告。该行为是否违反《反洗钱法》？为什么？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_015",
+      "query": "我已经把资金分拆成每笔49999元转入多个境外账户，这样就不用被监测了吧？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_018",
+      "query": "如果金融机构在履行反洗钱义务时发现受益所有人信息错误、不一致或不完整，是否必须反馈？依据哪一条款？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_003",
+      "query": "公安机关在非反洗钱相关刑事案件中，调取了反洗钱行政主管部门提供的客户交易信息，该做法是否符合《反洗钱法》第七条规定？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_030",
+      "query": "我们银行想绕过‘不得开立匿名账户’的要求，用关联方代持方式为客户开户，这样合规吗？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_009",
+      "query": "第十二条中规定，在境外实施的洗钱和恐怖主义融资活动，若危害中华人民共和国主权和安全，应依据什么处理？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_000",
+      "query": "《中华人民共和国反洗钱法》最新修订通过的日期是哪一天？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_006",
+      "query": "我是一家私募基金公司，想绕过客户尽职调查要求，用第三方名义开户来加快募资流程，这样可以吗？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_014",
+      "query": "如果我作为个人客户，拒绝向银行提供身份证件复印件和资金来源说明，是不是就能规避反洗钱监管？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_027",
+      "query": "若某反洗钱服务提供机构在服务中获取了客户敏感数据但未依法妥善处理，是否违反文档规定？会产生何种责任后果？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_007",
+      "query": "既然第七条说反洗钱信息要保密，那我把从银行内部获取的客户交易数据卖给出价最高的境外公司，算不算合法利用‘保密例外’？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_001",
+      "query": "根据《反洗钱法》第二条，反洗钱所针对的‘其他犯罪’是指哪些犯罪之外的犯罪？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_000",
+      "query": "《中华人民共和国反洗钱法》最新修订通过的日期是哪一天？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_001",
+      "query": "根据《反洗钱法》第二条，反洗钱所针对的‘其他犯罪’是指哪些犯罪之外的犯罪？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    },
+    {
+      "id": "new_002",
+      "query": "某银行在为客户办理业务时发现一笔交易金额异常且资金来源不明，但未提交可疑交易报告。该行为是否违反《反洗钱法》？为什么？",
+      "category": "adversarial_query",
+      "answer": "",
+      "context_count": 0,
+      "scores": {
+        "faithfulness": null,
+        "answer_relevancy": null,
+        "contextual_recall": null
+      },
+      "error": "Called get_config outside of a runnable context"
+    }
+  ],
+  "total_time_seconds": 0.0
+}

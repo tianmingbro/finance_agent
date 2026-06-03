@@ -2,6 +2,7 @@
 AI 测试 Skill - 三层渐进加载封装
 Day31 核心交付物
 """
+import logging
 import re
 import os
 from typing import List, Dict, Optional, Callable
@@ -14,6 +15,7 @@ from deepeval.models.llms.openai_model import GPTModel  # 确保导入
 
 # 用于延迟导入 FinancialRAGSkill（避免循环引用）
 import importlib
+logger = logging.getLogger(__name__)
 
 # -------------------- 1. 元数据层 --------------------
 # 触发词定义
@@ -21,6 +23,7 @@ PRIMARY_TRIGGERS = ["评测", "测试", "检查质量", "评估回答"]
 AUXILIARY_TRIGGERS = ["跑一下指标", "忠实度", "召回率", "幻觉检测",
                       "答案相关性", "正确性", "指标", "打分", "评价"]
 ALL_EVAL_KEYWORDS = PRIMARY_TRIGGERS + AUXILIARY_TRIGGERS
+
 
 
 @dataclass

@@ -1,80 +1,36 @@
+#!/usr/bin/env python3
 """
-run_evaluation_pipeline.py
-Day34 核心交付物：自动化评测流水线 + 回归检测（第6周完善版）
-
-关键优化：
-  1. FinancialRAGSkill 只实例化一次，所有测试用例复用（消除重复加载向量库/LLM）
-  2. ThreadPoolExecutor 并行评测，默认 6 并发
-  3. 使用 DeepEval 原生 evaluate() 函数，享受内置缓存、异步执行与进度条
-  4. 单用例失败不影响整体评测
+run_evaluation_pipeline.py (生产级)
+基于函数式工作流 rag_agent_workflow 的自动化评测管道。
+支持并行异步评测、超时控制、基线回归检测。
 """
-from datetime import datetime
-import os
 import sys
+from pathlib import Path
+
+# 将项目根目录添加到 sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+    
+import asyncio
 import json
-import yaml
-import time
+import os
 import statistics
+import time
+from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import Lock
 
-from dotenv import load_dotenv
-load_dotenv()
-
-# LangChain / LangGraph
-from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.memory import MemorySaver
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-
-# DeepEval
-from deepeval.metrics import FaithfulnessMetric, AnswerRelevancyMetric, ContextualRecallMetric
-from deepeval.test_case import LLMTestCase
-from deepeval.models import DeepEvalBaseLLM
-from deepeval import evaluate
-from deepeval.evaluate import AsyncConfig, CacheConfig, ErrorConfig
-from deepeval.models import GPTModel
-from openai import OpenAI
-
-# 现有技能
-from src.skill.financial_rag_skill import FinancialRAGSkill
-from archive.legacy.integrated_graph import GraphState
-
-os.environ["VECTOR_STORE_BACKEND"] = "pgvector"  # 评测时默认使用 PGVector，确保与生产环境一致  
-# -------------------- Qwen-Plus 评估模型 --------------------
-# class QwenPlusModel(DeepEvalBaseLLM):
-#     def __init__(self, model_name="qwen-plus"):
-#         self.client = OpenAI(
-#             api_key=os.getenv("DASHSCOPE_API_KEY"),
-#             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-#         )
-#         self.model_name = model_name
-
-#     def load_model(self):
-#         pass
-
-#     def generate(self, prompt: str) -> str:
-#         response = self.client.chat.completions.create(
-#             model="qwen-turbo",
-#             messages=[{"role": "user", "content": prompt}],
-#             temperature=0,
-#         )
-#         return response.choices[0].message.content
-
-#     async def a_generate(self, prompt: str) -> str:
-#         return self.generate(prompt)
-
-#     def get_model_name(self) -> str:
-#         return "qwen-turbo"
-
-# 全局评测模型（GPTModel 接受自定义客户端）
-EVAL_MODEL = GPTModel(
-    model="qwen-plus",
-    api_key=os.getenv("DASHSCOPE_API_KEY"),
-    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+import yaml
+from deepeval.metrics import (
+    FaithfulnessMetric,
+    AnswerRelevancyMetric,
+    ContextualRecallMetric,
 )
+from deepeval.test_case import LLMTestCase
+from deepeval.models import GPTModel
+
+from workflow import rag_agent_workflow
 
 # -------------------- 配置 --------------------
 EVAL_DATASET_PATH = "data/eval_dataset_v2.yaml"
@@ -88,202 +44,188 @@ METRIC_THRESHOLDS = {
     "contextual_recall": 0.7,
 }
 
-# 并行评测配置
-MAX_CONCURRENT = 6          # 并发度（qwen-plus 限流 200 QPM，6 并发安全）
-ENABLE_PARALLEL = True       # 设为 False 可切回串行模式
+# 并发控制
+MAX_CONCURRENT = 4                # 同时进行的评测数
+PER_CASE_TIMEOUT = 60             # 单个用例最大总时间（秒）
 
-# 打印锁，防止并发输出混乱
-print_lock = Lock()
+# DeepEval 评判模型
+EVAL_MODEL = GPTModel(
+    model="qwen-plus",
+    api_key=os.getenv("DASHSCOPE_API_KEY"),
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+)
 
-# -------------------- 数据集加载 --------------------
+# -------------------- 工具函数 --------------------
 def load_eval_dataset(path: str) -> List[Dict[str, Any]]:
     if not Path(path).exists():
         raise FileNotFoundError(f"数据集不存在: {path}")
-
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
-
     test_cases = []
     for category in data.get("categories", []):
-        cat_name = category["category"]
         for entry in category.get("entries", []):
             test_cases.append({
-                "id": entry.get("id", f"{cat_name}_{len(test_cases)}"),
+                "id": entry.get("id", f"{category['category']}_{len(test_cases)}"),
                 "query": entry["query"],
                 "expected_answer": entry.get("expected_answer", ""),
-                "category": cat_name,
+                "category": category["category"],
             })
     print(f"📋 加载评测数据集，共 {len(test_cases)} 条测试用例")
     return test_cases
 
 
-# -------------------- 评测图构建（复用 Skill） --------------------
-def build_rag_graph(skill: FinancialRAGSkill):
-    """
-    构建仅包含金融回答节点的最小 LangGraph 工作流。
-    skill 在外部创建一次，所有调用复用同一实例（向量库/LLM 只加载一次）。
-    """
-
-    def finance_answer_node(state: GraphState) -> dict:
-        query = state["query"]
-        # 复用外部 skill 实例，不新建
-        if not skill.resource_mgr._loaded:
-            skill.resource_mgr.load_resources()
-        retriever = skill.resource_mgr.retriever
-        llm = skill.resource_mgr.llm
-
-        # 检索
-        docs = retriever.invoke(query)
-        context_texts = [doc.page_content for doc in docs]
-
-        # 生成回答
-        instruction = skill.instruction_loader.load_instruction(query)
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", instruction + "\n\n上下文:\n{context}"),
-            ("human", "{input}"),
-        ])
-        combine_chain = create_stuff_documents_chain(llm, prompt)
-        answer = combine_chain.invoke({"context": docs, "input": query})
-
-        return {"answer": answer, "context": context_texts}
-
-    builder = StateGraph(GraphState)
-    builder.add_node("finance_answer", finance_answer_node)
-    builder.add_edge(START, "finance_answer")
-    builder.add_edge("finance_answer", END)
-
-    memory = MemorySaver()
-    return builder.compile(checkpointer=memory)
-
-from difflib import SequenceMatcher
-
-def clean_retrieval_context(contexts: List[str], expected_answer: str, 
+def clean_retrieval_context(contexts: List[str], expected_answer: str,
                             similarity_threshold: float = 0.7) -> List[str]:
-    """
-    移除与标准答案高度相似的检索上下文，防止数据泄露导致指标失真。
-    """
-    cleaned = []
-    for ctx in contexts:
-        # 使用 SequenceMatcher 计算文本相似度
-        similarity = SequenceMatcher(None, ctx, expected_answer).ratio()
-        if similarity < similarity_threshold:
-            cleaned.append(ctx)
-    return cleaned
+    """移除与标准答案高度相似的上下文，避免数据泄露"""
+    from difflib import SequenceMatcher
+    return [
+        ctx for ctx in contexts
+        if SequenceMatcher(None, ctx, expected_answer).ratio() < similarity_threshold
+    ]
 
-def evaluate_test_case(query: str, answer: str, contexts: List[str], expected_answer: str = "") -> Dict[str, float]:
-    scores = {"faithfulness":None, "answer_relevancy": None, "contextual_recall": None}
-        # 创建自定义的 OpenAI 客户端，指向 DashScope
 
-    for metric_name, MetricCls in [
-        ("faithfulness", FaithfulnessMetric),
-        ("answer_relevancy", AnswerRelevancyMetric),
-        ("contextual_recall", ContextualRecallMetric),
-    ]:
+async def evaluate_test_case(
+    query: str,
+    answer: str,
+    contexts: List[str],
+    expected_answer: str = "",
+) -> Dict[str, Optional[float]]:
+    """异步运行三项指标评测，返回分数字典"""
+    scores = {"faithfulness": None, "answer_relevancy": None, "contextual_recall": None}
+    loop = asyncio.get_running_loop()
+
+    async def _measure(metric_cls, need_expected: bool = False, need_clean: bool = False):
         try:
-            metric = MetricCls(model=EVAL_MODEL, threshold=0.7,include_reason=False,
-                            )
-            # 清洗上下文（仅对 faithfulness 和 contextual_recall 有必要）
-            cleaned_contexts = contexts
-            if metric_name in ("faithfulness", "contextual_recall") and expected_answer:
-                cleaned_contexts = clean_retrieval_context(contexts, expected_answer)
-
+            metric = metric_cls(model=EVAL_MODEL, threshold=0.7, include_reason=False)
+            _contexts = contexts
+            if need_clean and expected_answer:
+                _contexts = clean_retrieval_context(contexts, expected_answer)
             test_case = LLMTestCase(
-                input=query, 
-                actual_output=answer, 
-                retrieval_context=cleaned_contexts
+                input=query,
+                actual_output=answer,
+                retrieval_context=_contexts,
             )
-            # test_case = LLMTestCase(input=query, actual_output=answer, retrieval_context=contexts)
-            if metric_name=="contextual_recall":
+            if need_expected:
                 if not expected_answer:
-                    raise ValueError("缺少 expected_answer，无法计算 ContextualRecall")
-                
+                    raise ValueError("缺少 expected_answer")
                 test_case.expected_output = expected_answer
-            metric.measure(test_case)
-            scores[metric_name] = metric.score if metric.score is not None else 0.0
+
+            # 在线程池中执行同步 measure
+            await loop.run_in_executor(None, metric.measure, test_case)
+            return metric.score if metric.score is not None else 0.0
         except Exception as e:
-            print(f"    ⚠️ {metric_name} 评测失败: {e}")
-            scores[metric_name] = 0.0   # 标记为缺失
-    return scores
+            print(f"    ⚠️ {metric_cls.__name__} 评测失败: {e}")
+            return None
 
-# -------------------- 并行批量评测 --------------------
-def run_parallel_evaluation(
-    test_cases: List[Dict],
-    graph,
-    max_concurrent: int = 1,          # 移除了 config 参数，因为不再需要统一配置
-) -> List[Dict]:
-    """使用 ThreadPoolExecutor 并行评测所有用例"""
-    results = [None] * len(test_cases)
+    # 并发运行三个指标
+    faith, relevancy, recall = await asyncio.gather(
+        _measure(FaithfulnessMetric, need_clean=True),
+        _measure(AnswerRelevancyMetric),
+        _measure(ContextualRecallMetric, need_expected=True),
+        return_exceptions=True,
+    )
 
-    def process_single(idx: int, tc: Dict) -> tuple:
-        # 每个用例独立的 thread_id，避免状态串扰
-        unique_config = {"configurable": {"thread_id": f"eval_{tc['id']}"}}
-        query = tc["query"]
-        try:
-            # ★ 关键修改：使用 unique_config 而不是外部传入的 config
-            state = graph.invoke({"query": query}, unique_config)
-            answer = state.get("answer", "")
-            contexts = state.get("context", [])
-            scores = evaluate_test_case(
-                query, answer, contexts,
-                expected_answer=tc.get("expected_answer", ""),
-            )
-            result = {
-                "id": tc["id"],
-                "query": query,
-                "category": tc["category"],
-                "answer": answer[:200],
-                "context_count": len(contexts),
-                "scores": scores,
-            }
-            with print_lock:
-                print(
-                    f"[{idx+1}/{len(test_cases)}] ✅ {query[:40]}... "
-                    f"F:{scores['faithfulness']:.2f} "
-                    f"R:{scores['answer_relevancy']:.2f} "
-                    f"C:{scores['contextual_recall']:.2f}"
-                )
-            return idx, result, None
-        except Exception as e:
-            with print_lock:
-                print(f"[{idx+1}/{len(test_cases)}] ❌ {query[:40]}... 失败: {e}")
-            return idx, {
-                "id": tc["id"],
-                "query": query,
-                "category": tc["category"],
-                "answer": "",
-                "context_count": 0,
-                "scores": {
-                    "faithfulness": None,        # 建议失败时用 None 而非 0.0，避免拉低统计
-                    "answer_relevancy": None,
-                    "contextual_recall": None,
-                },
-            }, None
+    if isinstance(faith, BaseException):
+        faith = None
+    if isinstance(relevancy, BaseException):
+        relevancy = None
+    if isinstance(recall, BaseException):
+        recall = None
 
-    with ThreadPoolExecutor(max_workers=max_concurrent) as executor:
-        futures = {
-            executor.submit(process_single, i, tc): i
-            for i, tc in enumerate(test_cases)
+    return {
+        "faithfulness": faith,
+        "answer_relevancy": relevancy,
+        "contextual_recall": recall,
+    }
+
+
+async def process_one_case(idx: int, tc: Dict[str, Any]) -> Dict[str, Any]:
+    """处理单个测试用例：调用工作流 + 评测"""
+    query = tc["query"]
+    start_time = time.time()
+    try:
+        # 调用异步工作流（设置超时）
+        workflow_result = await asyncio.wait_for(
+            rag_agent_workflow.ainvoke({"query": query, "need_eval": False}),
+            timeout=PER_CASE_TIMEOUT,
+        )
+        answer = workflow_result.get("answer", "")
+        context_list = workflow_result.get("context", [])
+    except asyncio.TimeoutError:
+        print(f"[{idx+1}] ❌ {query[:50]}... 工作流超时")
+        return {
+            "id": tc["id"],
+            "query": query,
+            "category": tc["category"],
+            "answer": "",
+            "context_count": 0,
+            "scores": {"faithfulness": None, "answer_relevancy": None, "contextual_recall": None},
+            "error": "Workflow timeout",
         }
-        for future in as_completed(futures):
-            idx, result, _ = future.result()
-            results[idx] = result
+    except Exception as e:
+        print(f"[{idx+1}] ❌ {query[:50]}... 工作流异常: {e}")
+        return {
+            "id": tc["id"],
+            "query": query,
+            "category": tc["category"],
+            "answer": "",
+            "context_count": 0,
+            "scores": {"faithfulness": None, "answer_relevancy": None, "contextual_recall": None},
+            "error": str(e),
+        }
 
-    return results
+    # 评测
+    try:
+        scores = await evaluate_test_case(
+            query,
+            answer,
+            context_list,
+            tc.get("expected_answer", ""),
+        )
+    except Exception as e:
+        scores = {"faithfulness": None, "answer_relevancy": None, "contextual_recall": None}
+
+    elapsed = time.time() - start_time
+    print(f"[{idx+1}/{total_cases}] {'✅' if scores.get('faithfulness') else '❌'} {query[:40]}... "
+          f"F:{scores['faithfulness']} R:{scores['answer_relevancy']} C:{scores['contextual_recall']} "
+          f"({elapsed:.1f}s)")
+
+    return {
+        "id": tc["id"],
+        "query": query,
+        "category": tc["category"],
+        "answer": answer[:200],
+        "context_count": len(context_list),
+        "scores": scores,
+    }
 
 
-# -------------------- 统计与报告（同原版） --------------------
+async def run_parallel_evaluation(test_cases: List[Dict], max_concurrent: int) -> List[Dict]:
+    """使用信号量控制并发的异步评测"""
+    global total_cases
+    total_cases = len(test_cases)
+    semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def bounded(idx, tc):
+        async with semaphore:
+            return await process_one_case(idx, tc)
+
+    tasks = [bounded(i, tc) for i, tc in enumerate(test_cases)]
+    results = await asyncio.gather(*tasks)
+    return list(results)
+
+
+# -------------------- 基线管理 --------------------
 def load_baseline() -> Optional[Dict[str, float]]:
     if not Path(BASELINE_PATH).exists():
         return None
     with open(BASELINE_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
-
 def save_baseline(avg_scores: Dict[str, float]):
     with open(BASELINE_PATH, "w", encoding="utf-8") as f:
         json.dump(avg_scores, f, indent=2)
     print(f"✅ 新基线已保存至 {BASELINE_PATH}")
-
 
 def check_regression(current_avg: Dict[str, float], baseline: Dict[str, float]) -> List[str]:
     warnings = []
@@ -294,11 +236,8 @@ def check_regression(current_avg: Dict[str, float], baseline: Dict[str, float]) 
         drop = base_val - cur_val
         if drop > REGRESSION_THRESHOLD:
             pct = (drop / base_val) * 100
-            warnings.append(
-                f"⚠️ {metric}: 基线 {base_val:.3f} → 当前 {cur_val:.3f} (下降 {pct:.1f}%)"
-            )
+            warnings.append(f"⚠️ {metric}: 基线 {base_val:.3f} → 当前 {cur_val:.3f} (下降 {pct:.1f}%)")
     return warnings
-
 
 def compute_statistics(values: List[float]) -> Dict[str, float]:
     valid = [v for v in values if v is not None]
@@ -309,20 +248,15 @@ def compute_statistics(values: List[float]) -> Dict[str, float]:
         "std": statistics.stdev(valid) if len(valid) > 1 else 0.0,
         "min": min(valid),
         "max": max(valid),
-        "failed": len(values) - len(valid)
+        "failed": len(values) - len(valid),
     }
 
-
-def generate_report(
-    results: List[Dict],
-    warnings: List[str],
-    baseline: Optional[Dict[str, float]],
-) -> Dict:
+def generate_report(results: List[Dict], warnings: List[str],
+                    baseline: Optional[Dict[str, float]]) -> Dict:
     metric_scores = {"faithfulness": [], "answer_relevancy": [], "contextual_recall": []}
     for r in results:
         for m in metric_scores:
-            if m in r["scores"]:
-                metric_scores[m].append(r["scores"][m])
+            metric_scores[m].append(r["scores"].get(m))
 
     summary = {}
     for m, vals in metric_scores.items():
@@ -331,15 +265,14 @@ def generate_report(
     passed = 0
     for r in results:
         if all(
-            r["scores"].get(m, 0) >= METRIC_THRESHOLDS[m]
+            r["scores"].get(m) is not None and r["scores"].get(m, 0) >= METRIC_THRESHOLDS[m]
             for m in metric_scores
         ):
             passed += 1
-    total = len(results)
-    pass_rate = passed / total if total > 0 else 0.0
+    pass_rate = passed / len(results) if results else 0.0
 
     return {
-        "total_test_cases": total,
+        "total_test_cases": len(results),
         "overall_pass_rate": round(pass_rate, 3),
         "metrics_summary": summary,
         "baseline": baseline,
@@ -348,10 +281,10 @@ def generate_report(
     }
 
 
-# -------------------- 主流程 --------------------
-def main():
+# -------------------- 主入口 --------------------
+async def main():
     print("=" * 60)
-    print("  金融 RAG 自动化评测流水线（完善版）")
+    print("  金融 RAG 自动化评测流水线（生产级异步版）")
     print("=" * 60)
 
     # 备份旧报告
@@ -360,57 +293,23 @@ def main():
         os.rename(REPORT_PATH, backup)
         print(f"📦 旧报告已备份为 {backup}")
 
-    # 1. 加载数据集
     test_cases = load_eval_dataset(EVAL_DATASET_PATH)
+    if not test_cases:
+        print("❌ 无测试用例，退出")
+        return
 
-    # 2. ★ 关键优化：只创建一次 FinancialRAGSkill，所有用例复用 ★
-    print("🔧 初始化金融 RAG Skill（仅一次）...")
-    skill = FinancialRAGSkill()
-    graph = build_rag_graph(skill)
-    config = {"configurable": {"thread_id": "eval_pipeline"}}
+    print(f"⚡ 开始异步并行评测（最多 {MAX_CONCURRENT} 并发，单用例超时 {PER_CASE_TIMEOUT}s）")
+    start_all = time.time()
+    results = await run_parallel_evaluation(test_cases, MAX_CONCURRENT)
+    elapsed_all = time.time() - start_all
 
-    # 3. 评测
-    if ENABLE_PARALLEL:
-        print(f"⚡ 并行评测模式（{MAX_CONCURRENT} 并发）")
-        results = run_parallel_evaluation(
-            test_cases, graph, max_concurrent=MAX_CONCURRENT
-        )
-    else:
-        print("🐢 串行评测模式")
-        results = []
-        for i, tc in enumerate(test_cases, 1):
-            query = tc["query"]
-            print(f"[{i}/{len(test_cases)}] 评测: {query[:50]}...")
-            state = graph.invoke({"query": query}, config)
-            answer = state.get("answer", "")
-            contexts = state.get("context", [])
-            try:
-                scores = evaluate_test_case(
-                    query, answer, contexts,
-                    expected_answer=tc.get("expected_answer", ""),
-                )
-            except Exception as e:
-                print(f"  ❌ 指标计算失败: {e}")
-                scores = {"faithfulness": None, "answer_relevancy": None, "contextual_recall": None}
-            results.append({
-                "id": tc["id"],
-                "query": query,
-                "category": tc["category"],
-                "answer": answer[:200],
-                "context_count": len(contexts),
-                "scores": scores,
-            })
-            print(f"  F:{scores['faithfulness']:.2f} "
-                  f"R:{scores['answer_relevancy']:.2f} "
-                  f"C:{scores['contextual_recall']:.2f}")
-
-    # 4. 统计
+    # 计算指标均值
     metric_means = {}
     for m in ["faithfulness", "answer_relevancy", "contextual_recall"]:
-        vals = [r["scores"][m] for r in results]
+        vals = [r["scores"].get(m) for r in results if r["scores"].get(m) is not None]
         metric_means[m] = statistics.mean(vals) if vals else 0.0
 
-    # 5. 回归检测
+    # 回归检测
     baseline = load_baseline()
     warnings = []
     if baseline:
@@ -426,16 +325,18 @@ def main():
         save_baseline(metric_means)
         baseline = metric_means
 
-    # 6. 生成报告
     report = generate_report(results, warnings, baseline)
+    report["total_time_seconds"] = round(elapsed_all, 1)
+
     with open(REPORT_PATH, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
 
     print(f"\n📊 评测报告已保存至 {REPORT_PATH}")
     print(f"总用例: {report['total_test_cases']}, 整体通过率: {report['overall_pass_rate']:.1%}")
+    print(f"总耗时: {elapsed_all:.1f}s")
     for m, stats in report["metrics_summary"].items():
-        print(f"  {m}: 均值 {stats['mean']:.3f} (±{stats['std']:.3f})")
+        print(f"  {m}: 均值 {stats['mean']:.3f} (±{stats['std']:.3f}, 失败 {stats['failed']})")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
