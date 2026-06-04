@@ -30,7 +30,7 @@ from deepeval.metrics import (
 from deepeval.test_case import LLMTestCase
 from deepeval.models import GPTModel
 
-from workflow import rag_agent_workflow
+from src.agent.workflow import rag_agent_workflow
 
 # -------------------- 配置 --------------------
 EVAL_DATASET_PATH = "data/eval_dataset_v2.yaml"

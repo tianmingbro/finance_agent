@@ -157,12 +157,12 @@ async def evaluate_task(
         faith = next((m.score for m in report.metrics if m.name == "faithfulness"), 0.0)
         relevancy = next((m.score for m in report.metrics if m.name == "answer_relevancy"), 0.0)
 
-        result = {
+        result =json.dumps({
             "faithfulness": faith,
             "answer_relevancy": relevancy,
             "trust": report.overall_trust,
             "context_used": bool(context_texts),
-        }
+        },ensure_ascii= False)
         logger.info("评测完成：faithfulness=%.2f, relevancy=%.2f", faith, relevancy)
         return result
     except asyncio.TimeoutError:

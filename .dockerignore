@@ -1,0 +1,47 @@
+# 虚拟环境
+venv/
+.venv/
+env/
+.env/
+
+# 模型缓存
+models/
+*.bin
+*.safetensors
+*.pkl
+*.h5
+models1/
+
+# HuggingFace 缓存
+cache/
+huggingface/
+
+# 向量库数据
+chroma_db/
+data/chroma_db/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# 测试与文档
+tests/
+docs/
+
+# Docker 相关
+Dockerfile
+.dockerignore
+docker-compose.yml

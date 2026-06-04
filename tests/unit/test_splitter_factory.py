@@ -1,6 +1,6 @@
 import os
 
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 import pytest
 from pathlib import Path
 from langchain_core.documents import Document
