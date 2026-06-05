@@ -1,0 +1,425 @@
+{
+  "total_test_cases": 20,
+  "overall_pass_rate": 0.75,
+  "components_summary": {
+    "planning": {
+      "metrics": {
+        "tool_accuracy": {
+          "mean": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "arg_reasonableness": {
+          "mean": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0
+        }
+      },
+      "passed": true,
+      "thresholds": {
+        "tool_accuracy": 0.9,
+        "arg_reasonableness": 0.8
+      }
+    },
+    "retrieval": {
+      "metrics": {
+        "contextual_recall": {
+          "mean": 0.95,
+          "std": 0.22360679774997896,
+          "min": 0.0,
+          "max": 1.0
+        },
+        "contextual_precision": {
+          "mean": 0.9416666666666667,
+          "std": 0.13545461681454152,
+          "min": 0.5833333333333333,
+          "max": 1.0
+        }
+      },
+      "passed": true,
+      "thresholds": {
+        "contextual_recall": 0.7,
+        "contextual_precision": 0.7
+      }
+    },
+    "generation": {
+      "metrics": {
+        "faithfulness": {
+          "mean": 0.8829166666666667,
+          "std": 0.19048021416489455,
+          "min": 0.3333333333333333,
+          "max": 1.0
+        },
+        "answer_relevancy": {
+          "mean": 0.9888136288998358,
+          "std": 0.029019693978435644,
+          "min": 0.8928571428571429,
+          "max": 1.0
+        }
+      },
+      "passed": true,
+      "thresholds": {
+        "faithfulness": 0.8,
+        "answer_relevancy": 0.8
+      }
+    }
+  },
+  "detailed_results": [
+    {
+      "id": "new_024",
+      "query": "根据文档片段，金融机构开展客户尽职调查的三种法定情形是什么？",
+      "category": "factual_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_035",
+      "query": "一家银行因客户存在可疑交易而暂停其网上银行转账功能，但未影响其柜台存取款及社保缴费服务。该做法是否符合第三十条关于‘平衡风险管理与基本金融服务’的要求？",
+      "category": "factual_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 0.875,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_033",
+      "query": "金融机构依托第三方开展客户尽职调查时，若第三方未采取符合法定要求的尽职调查措施，法律责任由谁承担？",
+      "category": "factual_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 0.75
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_022",
+      "query": "我已经帮客户把大额现金拆分成多次出入境携带，这样就不用向海关申报了，对吗？",
+      "category": "factual_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 0.875,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_013",
+      "query": "他们要保密的内容包括哪些？",
+      "category": "factual_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 0.0,
+        "contextual_precision": 0.5833333333333333
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_045",
+      "query": "若境外监管机构未经与我国协商一致，直接要求境内银行提供某客户的全部交易明细并冻结其账户，该银行执行该要求是否合规？",
+      "category": "reasoning_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_040",
+      "query": "某金融机构收到一份仅由一名调查人员出示的调查通知书，该机构是否有权拒绝接受调查？为什么？",
+      "category": "reasoning_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 0.9166666666666666
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_044",
+      "query": "调查人员没带执法证件，但我怕得罪人，能不能配合调查不核实证件？",
+      "category": "reasoning_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_043",
+      "query": "我已经知道客户在名单上，但客户坚持要完成一笔转账，我能不能先操作再补报？",
+      "category": "reasoning_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_054",
+      "query": "如果我不计提足贷款损失准备，但把资本监管指标算得好看些，能通过检查吗？",
+      "category": "reasoning_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_050",
+      "query": "那个机构名单是怎么确定的？",
+      "category": "ambiguous_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 0.5,
+        "answer_relevancy": 0.8928571428571429
+      }
+    },
+    {
+      "id": "new_048",
+      "query": "那个五万元的罚款适用于谁？",
+      "category": "ambiguous_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 0.3333333333333333,
+        "answer_relevancy": 0.9310344827586207
+      }
+    },
+    {
+      "id": "new_056",
+      "query": "那个扣除规则是怎么规定的？",
+      "category": "ambiguous_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 0.5833333333333333
+      },
+      "generation": {
+        "faithfulness": 0.7333333333333333,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_012",
+      "query": "那个机构可以要求补充信息？",
+      "category": "ambiguous_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 0.875,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_053",
+      "query": "那个余额是怎么算的？",
+      "category": "ambiguous_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_002",
+      "query": "某银行在为客户办理业务时发现一笔交易金额异常且资金来源不明，但未提交可疑交易报告。该行为是否违反《反洗钱法》？为什么？",
+      "category": "adversarial_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 0.6666666666666666,
+        "answer_relevancy": 0.9523809523809523
+      }
+    },
+    {
+      "id": "new_015",
+      "query": "我已经把资金分拆成每笔49999元转入多个境外账户，这样就不用被监测了吧？",
+      "category": "adversarial_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_018",
+      "query": "如果金融机构在履行反洗钱义务时发现受益所有人信息错误、不一致或不完整，是否必须反馈？依据哪一条款？",
+      "category": "adversarial_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_003",
+      "query": "公安机关在非反洗钱相关刑事案件中，调取了反洗钱行政主管部门提供的客户交易信息，该做法是否符合《反洗钱法》第七条规定？",
+      "category": "adversarial_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 0.8,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "new_030",
+      "query": "我们银行想绕过‘不得开立匿名账户’的要求，用关联方代持方式为客户开户，这样合规吗？",
+      "category": "adversarial_query",
+      "planning": {
+        "tool_accuracy": 1.0,
+        "arg_reasonableness": 1.0
+      },
+      "retrieval": {
+        "contextual_recall": 1.0,
+        "contextual_precision": 1.0
+      },
+      "generation": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    }
+  ],
+  "thresholds": {
+    "planning": {
+      "tool_accuracy": 0.9,
+      "arg_reasonableness": 0.8
+    },
+    "retrieval": {
+      "contextual_recall": 0.7,
+      "contextual_precision": 0.7
+    },
+    "generation": {
+      "faithfulness": 0.8,
+      "answer_relevancy": 0.8
+    }
+  }
+}

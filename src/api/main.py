@@ -9,8 +9,10 @@ import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import List, Optional
 import sys, os, json
+
+from eval_components import evaluate_generation, evaluate_planning, evaluate_retrieval
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from contextlib import asynccontextmanager
@@ -169,3 +171,41 @@ async def raise_error(error_type: str = "value_error"):
         raise ConnectionError("测试: 无法连接数据库")
     else:
         raise HTTPException(400, f"未知错误类型: {error_type}")
+    
+# api/main.py 新增内容
+
+class ComponentEvalRequest(BaseModel):
+    query: str = Field(..., min_length=1)
+    expected_tool: Optional[str] = None
+    expected_args: Optional[dict] = None
+    key_info: Optional[List[str]] = None
+    expected_answer: Optional[str] = None
+
+class ComponentEvalResponse(BaseModel):
+    planning: dict
+    retrieval: dict
+    generation: dict
+
+@app.post("/eval/component", response_model=ComponentEvalResponse)
+async def evaluate_component(req: ComponentEvalRequest):
+    """执行组件级评估：规划、检索、生成"""
+    planning = evaluate_planning(
+        query=req.query,
+        expected_tool=req.expected_tool or "financial_qa",
+        expected_args=req.expected_args or {"query": req.query}
+    )
+    retrieval = await asyncio.to_thread(
+        evaluate_retrieval,
+        query=req.query,
+        key_info=req.key_info
+    )
+    generation = await asyncio.to_thread(
+        evaluate_generation,
+        query=req.query,
+        expected_answer=req.expected_answer
+    )
+    return ComponentEvalResponse(
+        planning=planning,
+        retrieval=retrieval,
+        generation=generation
+    )

@@ -20,7 +20,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-
+import argparse
+from eval_components import generate_component_report
 import yaml
 from deepeval.metrics import (
     FaithfulnessMetric,
@@ -286,56 +287,74 @@ async def main():
     print("=" * 60)
     print("  金融 RAG 自动化评测流水线（生产级异步版）")
     print("=" * 60)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--component", action="store_true",
+                        help="运行组件级评估而非整体评估")
+    args = parser.parse_args()
 
-    # 备份旧报告
-    if Path(REPORT_PATH).exists():
-        backup = f"eval_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        os.rename(REPORT_PATH, backup)
-        print(f"📦 旧报告已备份为 {backup}")
-
-    test_cases = load_eval_dataset(EVAL_DATASET_PATH)
-    if not test_cases:
-        print("❌ 无测试用例，退出")
-        return
-
-    print(f"⚡ 开始异步并行评测（最多 {MAX_CONCURRENT} 并发，单用例超时 {PER_CASE_TIMEOUT}s）")
-    start_all = time.time()
-    results = await run_parallel_evaluation(test_cases, MAX_CONCURRENT)
-    elapsed_all = time.time() - start_all
-
-    # 计算指标均值
-    metric_means = {}
-    for m in ["faithfulness", "answer_relevancy", "contextual_recall"]:
-        vals = [r["scores"].get(m) for r in results if r["scores"].get(m) is not None]
-        metric_means[m] = statistics.mean(vals) if vals else 0.0
-
-    # 回归检测
-    baseline = load_baseline()
-    warnings = []
-    if baseline:
-        warnings = check_regression(metric_means, baseline)
-        if warnings:
-            print("\n🚨 回归警告：")
-            for w in warnings:
-                print("  " + w)
-        else:
-            print("\n✅ 未检测到显著回归")
+    if args.component:
+        # 加载组件测试数据
+        data_path = "data/component_eval_data.yaml"
+        if not Path(data_path).exists():
+            print(f"组件测试数据文件缺失: {data_path}")
+            sys.exit(1)
+        with open(data_path, "r", encoding="utf-8") as f:
+            test_data = yaml.safe_load(f)["test_cases"]
+        report = generate_component_report(test_data)
+        output = "component_eval_report.json"
+        with open(output, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2, ensure_ascii=False)
+        print(f"组件评估报告已保存至 {output}")
     else:
-        print("\n📌 无历史基线，保存当前结果为基线")
-        save_baseline(metric_means)
-        baseline = metric_means
+        # 备份旧报告
+        if Path(REPORT_PATH).exists():
+            backup = f"eval_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            os.rename(REPORT_PATH, backup)
+            print(f"📦 旧报告已备份为 {backup}")
 
-    report = generate_report(results, warnings, baseline)
-    report["total_time_seconds"] = round(elapsed_all, 1)
+        test_cases = load_eval_dataset(EVAL_DATASET_PATH)
+        if not test_cases:
+            print("❌ 无测试用例，退出")
+            return
 
-    with open(REPORT_PATH, "w", encoding="utf-8") as f:
-        json.dump(report, f, indent=2, ensure_ascii=False)
+        print(f"⚡ 开始异步并行评测（最多 {MAX_CONCURRENT} 并发，单用例超时 {PER_CASE_TIMEOUT}s）")
+        start_all = time.time()
+        results = await run_parallel_evaluation(test_cases, MAX_CONCURRENT)
+        elapsed_all = time.time() - start_all
 
-    print(f"\n📊 评测报告已保存至 {REPORT_PATH}")
-    print(f"总用例: {report['total_test_cases']}, 整体通过率: {report['overall_pass_rate']:.1%}")
-    print(f"总耗时: {elapsed_all:.1f}s")
-    for m, stats in report["metrics_summary"].items():
-        print(f"  {m}: 均值 {stats['mean']:.3f} (±{stats['std']:.3f}, 失败 {stats['failed']})")
+        # 计算指标均值
+        metric_means = {}
+        for m in ["faithfulness", "answer_relevancy", "contextual_recall"]:
+            vals = [r["scores"].get(m) for r in results if r["scores"].get(m) is not None]
+            metric_means[m] = statistics.mean(vals) if vals else 0.0
+
+        # 回归检测
+        baseline = load_baseline()
+        warnings = []
+        if baseline:
+            warnings = check_regression(metric_means, baseline)
+            if warnings:
+                print("\n🚨 回归警告：")
+                for w in warnings:
+                    print("  " + w)
+            else:
+                print("\n✅ 未检测到显著回归")
+        else:
+            print("\n📌 无历史基线，保存当前结果为基线")
+            save_baseline(metric_means)
+            baseline = metric_means
+
+        report = generate_report(results, warnings, baseline)
+        report["total_time_seconds"] = round(elapsed_all, 1)
+
+        with open(REPORT_PATH, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2, ensure_ascii=False)
+
+        print(f"\n📊 评测报告已保存至 {REPORT_PATH}")
+        print(f"总用例: {report['total_test_cases']}, 整体通过率: {report['overall_pass_rate']:.1%}")
+        print(f"总耗时: {elapsed_all:.1f}s")
+        for m, stats in report["metrics_summary"].items():
+            print(f"  {m}: 均值 {stats['mean']:.3f} (±{stats['std']:.3f}, 失败 {stats['failed']})")
 
 
 if __name__ == "__main__":

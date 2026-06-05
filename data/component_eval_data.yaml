@@ -1,0 +1,225 @@
+test_cases:
+  
+  - id: new_024
+    query: 根据文档片段，金融机构开展客户尽职调查的三种法定情形是什么？
+    expected_answer: （一）与客户建立业务关系或者为客户提供规定金额以上的一次性金融服务；（二）有合理理由怀疑客户及其交易涉嫌洗钱活动；（三）对先前获得的客户身份资料的真实性、有效性、完整性存在疑问。
+    category: factual_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "根据文档片段，金融机构开展客户尽职调查的三种法定情形是什么？"
+    retrieval:
+      key_info: ["客户尽职调查", "业务关系", "一次性金融服务", "可疑交易", "身份资料真实性"]
+  - id: new_035
+    query: 一家银行因客户存在可疑交易而暂停其网上银行转账功能，但未影响其柜台存取款及社保缴费服务。该做法是否符合第三十条关于‘平衡风险管理与基本金融服务’的要求？
+    expected_answer: 符合。第三十条要求不得采取与洗钱风险状况明显不相匹配的措施，并须保障医疗、社会保障、公用事业等基本必需服务。仅限制高风险渠道（网银转账）而保留基础服务，体现了合理匹配与必要保障。
+    category: factual_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "一家银行因客户存在可疑交易而暂停其网上银行转账功能，但未影响其柜台存取款及社保缴费服务。该做法是否符合第三十条关于‘平衡风险管理与基本金融服务’的要求？"
+    retrieval:
+      key_info: ["第三十条", "平衡风险管理", "基本金融服务", "高风险渠道", "基本必需服务"]
+  - id: new_033
+    query: 金融机构依托第三方开展客户尽职调查时，若第三方未采取符合法定要求的尽职调查措施，法律责任由谁承担？
+    expected_answer: 由该金融机构承担未履行客户尽职调查义务的法律责任。
+    category: factual_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "金融机构依托第三方开展客户尽职调查时，若第三方未采取符合法定要求的尽职调查措施，法律责任由谁承担？"
+    retrieval:
+      key_info: ["第三方", "尽职调查", "法律责任", "金融机构承担"]
+  - id: new_022
+    query: 我已经帮客户把大额现金拆分成多次出入境携带，这样就不用向海关申报了，对吗？
+    expected_answer: 不对。该行为涉嫌规避《第十八条》规定的申报义务，属于‘化整为零’逃避监管，构成违法；海关和反洗钱行政主管部门可通过数据比对、风险监测等方式识别并依法处理。
+    category: factual_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "我已经帮客户把大额现金拆分成多次出入境携带，这样就不用向海关申报了，对吗？"
+    retrieval:
+      key_info: ["第十八条", "申报义务", "化整为零", "逃避监管", "大额现金"]
+    additional_info: 知识库待扩充
+  - id: new_013
+    query: 他们要保密的内容包括哪些？
+    expected_answer: 请问‘他们’是指接受举报的机关（如反洗钱行政主管部门、公安机关等），还是其他主体？请明确主体和上下文，以便依据第十一等相关条款准确回应。
+    category: factual_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "他们要保密的内容包括哪些？"
+    retrieval:
+      key_info: ["保密", "举报", "反洗钱", "第十一条"]  # 因为是模糊查询，关键信息可能宽泛，但仍希望检索到相关条款
+  - id: new_045
+    query: 若境外监管机构未经与我国协商一致，直接要求境内银行提供某客户的全部交易明细并冻结其账户，该银行执行该要求是否合规？
+    expected_answer: 不合规。根据第五十条第一款，外国国家、组织违反对等或协商一致原则直接要求境内金融机构提交客户交易信息或冻结资金的，金融机构不得擅自执行，并须及时向国务院有关金融管理部门报告。
+    category: reasoning_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "若境外监管机构未经与我国协商一致，直接要求境内银行提供某客户的全部交易明细并冻结其账户，该银行执行该要求是否合规？"
+    retrieval:
+      key_info: ["第五十条", "境外监管机构", "协商一致", "交易信息", "冻结资金", "金融机构不得擅自执行"]
+  - id: new_040
+    query: 某金融机构收到一份仅由一名调查人员出示的调查通知书，该机构是否有权拒绝接受调查？为什么？
+    expected_answer: 有权拒绝。因为第四十三条明确规定：调查人员少于二人或者未出示执法证件和调查通知书的，金融机构有权拒绝接受调查。
+    category: reasoning_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "某金融机构收到一份仅由一名调查人员出示的调查通知书，该机构是否有权拒绝接受调查？为什么？"
+    retrieval:
+      key_info: ["第四十三条", "调查人员少于二人", "执法证件", "调查通知书", "拒绝接受调查"]
+  - id: new_044
+    query: 调查人员没带执法证件，但我怕得罪人，能不能配合调查不核实证件？
+    expected_answer: 不能。第四十三条明确规定：未出示执法证件和调查通知书的，金融机构有权拒绝接受调查。主动放弃法定抗辩权利可能构成未依法履职，导致机构及责任人被追责。
+    category: reasoning_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "调查人员没带执法证件，但我怕得罪人，能不能配合调查不核实证件？"
+    retrieval:
+      key_info: ["第四十三条", "执法证件", "调查通知书", "拒绝接受调查", "未依法履职"]
+  - id: new_043
+    query: 我已经知道客户在名单上，但客户坚持要完成一笔转账，我能不能先操作再补报？
+    expected_answer: 不可以。根据第四十一条，金融机构发现客户属于名单所列对象的，必须‘立即’采取相应措施（包括停止服务、限制资金转移），并及时报告；延迟执行或事后补报违反法定‘立即’义务，将承担法律责任。
+    category: reasoning_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "我已经知道客户在名单上，但客户坚持要完成一笔转账，我能不能先操作再补报？"
+    retrieval:
+      key_info: ["第四十一条", "名单", "立即采取相应措施", "停止服务", "限制资金转移", "及时报告"]
+  - id: new_054
+    query: 如果我不计提足贷款损失准备，但把资本监管指标算得好看些，能通过检查吗？
+    expected_answer: 不能。第七条明确规定：‘商业银行资本监管指标计算应建立在充分计提贷款损失准备等各项减值准备的基础之上’；未足额计提即计算资本指标属于严重违反监管要求的行为，国家金融监督管理总局将依据第九条采取监管措施，包括责令整改、通报批评、限制分红或业务准入等。
+    category: reasoning_query
+    source: capital_management_measures_2024.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "如果我不计提足贷款损失准备，但把资本监管指标算得好看些，能通过检查吗？"
+    retrieval:
+      key_info: ["第七条", "贷款损失准备", "资本监管指标", "计提", "监管措施"]
+  - id: new_050
+    query: 那个机构名单是怎么确定的？
+    expected_answer: 请问您指的是哪一类机构的名单？是第六十三条所列的金融机构，还是第六十四条所列的特定非金融机构？或是第六十四条第（四）项中‘其他机构’的确定机制？请具体说明。
+    category: ambiguous_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "那个机构名单是怎么确定的？"
+    retrieval:
+      key_info: ["第六十三条", "第六十四条", "金融机构", "特定非金融机构", "机构名单"]
+  - id: new_048
+    query: 那个五万元的罚款适用于谁？
+    expected_answer: 请问您指的是哪一条款中的‘五万元’？例如第五十八条针对特定非金融机构及其负责人，第五十九条针对个人未履行特别预防措施义务，第六十条针对法人未提交/虚假提交受益所有人信息等情形均有不同适用主体，请明确具体条款或场景。
+    category: ambiguous_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "那个五万元的罚款适用于谁？"
+    retrieval:
+      key_info: ["五万元", "第五十八条", "第五十九条", "第六十条", "罚款", "特定非金融机构"]
+    additional_info: 知识库待扩充
+  - id: new_056
+    query: 那个扣除规则是怎么规定的？
+    expected_answer: 请问您指的是哪一类扣除规则？例如：对保险公司的资本投资扣除（第十四条）、对未并表金融机构的资本投资扣除（第十六条）、还是对特殊状态被投资机构的资本投资扣除（第十五条）？请明确具体情形。
+    category: ambiguous_query
+    source: capital_management_measures_2024.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "那个扣除规则是怎么规定的？"
+    retrieval:
+      key_info: ["扣除规则", "第十四条", "第十五条", "第十六条", "保险公司", "资本投资"]
+  - id: new_012
+    query: 那个机构可以要求补充信息？
+    expected_answer: 请问您指的是哪类机构？是反洗钱监测分析机构、国务院反洗钱行政主管部门，还是其他监管部门？请明确具体所指，以便准确作答。
+    category: ambiguous_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "那个机构可以要求补充信息？"
+    retrieval:
+      key_info: ["补充信息", "反洗钱监测分析机构", "反洗钱行政主管部门", "监管部门"]
+  - id: new_053
+    query: 那个余额是怎么算的？
+    expected_answer: 请问您指的是哪一类余额？例如‘调整后表内外资产余额’‘境外债权债务余额’还是‘核心一级资本净额’？请明确具体指标，以便提供对应计算依据。
+    category: ambiguous_query
+    source: capital_management_measures_2024.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "那个余额是怎么算的？"
+    retrieval:
+      key_info: ["调整后表内外资产余额", "境外债权债务余额", "核心一级资本净额", "计算"]
+    additional_info: 知识库待扩充
+  - id: new_002
+    query: 某银行在为客户办理业务时发现一笔交易金额异常且资金来源不明，但未提交可疑交易报告。该行为是否违反《反洗钱法》？为什么？
+    expected_answer: 是。根据第六条，金融机构应当履行可疑交易报告义务；第八条进一步明确提交可疑交易报告受法律保护。未报告构成未依法履行反洗钱义务，可能承担第六章规定的法律责任。
+    category: adversarial_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "某银行在为客户办理业务时发现一笔交易金额异常且资金来源不明，但未提交可疑交易报告。该行为是否违反《反洗钱法》？为什么？"
+    retrieval:
+      key_info: ["第六条", "第八条", "可疑交易报告", "反洗钱义务", "法律责任"]
+  - id: new_015
+    query: 我已经把资金分拆成每笔49999元转入多个境外账户，这样就不用被监测了吧？
+    expected_answer: 不可以。该行为涉嫌故意规避大额交易报告义务，属于典型的‘结构化交易’（smurfing），违反第十条‘不得为洗钱活动提供便利’的规定；反洗钱监测分析机构依据第十六条有权分析关联交易并识别异常模式，此类行为将被重点监测并可能触发调查。
+    category: adversarial_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "我已经把资金分拆成每笔49999元转入多个境外账户，这样就不用被监测了吧？"
+    retrieval:
+      key_info: ["第十条", "第十六条", "结构化交易", "规避大额交易报告", "反洗钱监测"]
+  - id: new_018
+    query: 如果金融机构在履行反洗钱义务时发现受益所有人信息错误、不一致或不完整，是否必须反馈？依据哪一条款？
+    expected_answer: 是，必须按照规定进行反馈；依据《第二十一条》末句及《第十九条》最后一句：'发现受益所有人信息错误、不一致或者不完整的，应当按照规定进行反馈。'
+    category: adversarial_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "如果金融机构在履行反洗钱义务时发现受益所有人信息错误、不一致或不完整，是否必须反馈？依据哪一条款？"
+    retrieval:
+      key_info: ["第二十一条", "第十九条", "受益所有人信息", "反馈", "错误"]
+  - id: new_003
+    query: 公安机关在非反洗钱相关刑事案件中，调取了反洗钱行政主管部门提供的客户交易信息，该做法是否符合《反洗钱法》第七条规定？
+    expected_answer: 不符合。第七条规定司法机关获得的客户身份资料和交易信息‘只能用于反洗钱相关刑事诉讼’，用于其他刑事案件属于超范围使用，违反法定用途限制。
+    category: adversarial_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "公安机关在非反洗钱相关刑事案件中，调取了反洗钱行政主管部门提供的客户交易信息，该做法是否符合《反洗钱法》第七条规定？"
+    retrieval:
+      key_info: ["第七条", "反洗钱相关刑事诉讼", "客户身份资料", "交易信息", "法定用途限制"]
+  - id: new_030
+    query: 我们银行想绕过‘不得开立匿名账户’的要求，用关联方代持方式为客户开户，这样合规吗？
+    expected_answer: 不合规。第二十八条明确禁止为身份不明的客户开户，禁止开立匿名账户、假名账户及为冒用他人身份者开户；代持开户属于变相规避客户身份识别义务，构成严重违规，将依法承担法律责任。
+    category: adversarial_query
+    source: anti_money_laundering_law_2025.txt
+    planning:
+      expected_tool: financial_qa
+      expected_args:
+        query: "我们银行想绕过‘不得开立匿名账户’的要求，用关联方代持方式为客户开户，这样合规吗？"
+    retrieval:
+      key_info: ["第二十八条", "匿名账户", "身份不明", "客户身份识别", "代持"]
