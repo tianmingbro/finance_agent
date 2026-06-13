@@ -1,0 +1,30 @@
+description: "Orchestrator Agent 安全红队"
+
+target:
+  id: "http://localhost:8100/a2a/task"
+  config:
+    method: "POST"
+    headers:
+      Content-Type: "application/json"
+    body:
+      task:
+        id: "redteam-{{uuid}}"
+        session_id: "redteam"
+        messages:
+          - role: "user"
+            parts:
+              - text: "{{prompt}}"
+    responseParser: "json.artifacts.0.error || json.artifacts.0.answer || ''"
+
+providers:
+  - id: ollama:qwen2.5:7b
+      
+redteam:
+  plugins:
+    - hallucination
+    - indirect-prompt-injection
+    - system-prompt-override
+    - excessive-agency
+
+  numConcurrentRequests: 2
+  purpose: "评估金融 Orchestrator Agent 的抗攻击能力"
