@@ -39,16 +39,19 @@ from src.vectordb.vector_store_interface import create_vector_store
 from src.retriever.hybrid_retriever import HybridRetriever, create_bm25_retriever
 from langchain_core.documents import Document
 from src.cache.caching_manager import CachingManager
-from config import get_embedding_model_path, get_vector_size
+from src.config import get_embedding_model_path, get_vector_size
 logger = logging.getLogger(__name__)
+from pathlib import Path
+# 获取当前脚本所在的绝对路径
+BASE_DIR = Path(__file__).resolve().parent
 
 # -------------------- 配置 --------------------
 # 请确保已设置环境变量 DASHSCOPE_API_KEY
 QWEN_API_KEY = os.getenv("DASHSCOPE_API_KEY", "your-dashscope-api-key")
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(os.path.dirname(BASE_DIR))
-DATA_FILE = os.path.join(PROJECT_ROOT, "data", "finance_qa.txt")
-PERSIST_DIR = os.path.join(PROJECT_ROOT, "chroma_db")
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATA_FILE = PROJECT_ROOT/"data"/"finance_qa.txt"
+PERSIST_DIR = PROJECT_ROOT/"chroma_db"
 MODEL_PATH = get_embedding_model_path()
 VECTOR_SIZE = get_vector_size() 
 
@@ -224,11 +227,17 @@ class ResourceManager:
                 self._retriever = vector_retriever
             # LLM (Qwen-plus, 使用 OpenAI 兼容模式)
             logger.info("延迟加载 正在连接 Qwen-plus 模型...")
+            # self._llm = ChatOpenAI(
+            #     model="qwen-plus",
+            #     temperature=0,
+            #     openai_api_key=QWEN_API_KEY,
+            #     openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
+            # )
             self._llm = ChatOpenAI(
-                model="qwen-plus",
+                model="qwen2.5:7b",                     # Ollama 中的模型名
                 temperature=0,
-                openai_api_key=QWEN_API_KEY,
-                openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
+                openai_api_key="ollama",                # 任意非空字符串
+                openai_api_base="http://localhost:11434/v1",
             )
 
              # ── 缓存层初始化（由 DISABLE_CACHE 控制） ──

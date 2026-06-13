@@ -24,7 +24,7 @@ from langchain_core.documents import Document
 
 import pytest
 
-from config import get_embedding_model_path
+from src.config import get_embedding_model_path
 MODEL_PATH = get_embedding_model_path()
 
 

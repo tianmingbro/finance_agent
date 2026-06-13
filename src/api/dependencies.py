@@ -5,11 +5,11 @@ api/dependencies.py
 """
 import asyncio
 import logging
-
+logger = logging.getLogger(__name__)
 from src.skill.financial_rag_skill import FinancialRAGSkill
 from src.skill.ai_test_skill import EvaluationRunner, EvalResourceManager
 
-logger = logging.getLogger(__name__)
+
 
 _financial_skill = None
 _eval_runner = None

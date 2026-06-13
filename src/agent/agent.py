@@ -43,11 +43,17 @@ async def build_agent(checkpointer=None, use_sqlite: bool = False, db_path: str 
 
     _get_financial_skill()  # 内部会调用 load_resources()，设置全局 LLM 缓存
 
+    # llm = ChatOpenAI(
+    #     model="qwen-plus",
+    #     temperature=0,
+    #     openai_api_key=DASHSCOPE_API_KEY,
+    #     openai_api_base=BASE_URL,
+    # )
     llm = ChatOpenAI(
-        model="qwen-plus",
-        temperature=0,
-        openai_api_key=DASHSCOPE_API_KEY,
-        openai_api_base=BASE_URL,
+    model="qwen2.5:7b",                     # Ollama 中的模型名
+    temperature=0,
+    openai_api_key="ollama",                # 任意非空字符串
+    openai_api_base="http://localhost:11434/v1",
     )
     mcp_tools = await get_finance_mcp_tools()
     if isinstance(mcp_tools, list) and len(mcp_tools) == 1 and isinstance(mcp_tools[0], list):

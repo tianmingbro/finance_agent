@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 # 导入待实现的评估函数（当前未实现，因此测试会失败）
-from eval_components import (
+from src.pipeline.eval_components import (
     evaluate_planning,
     evaluate_retrieval,
     evaluate_generation,

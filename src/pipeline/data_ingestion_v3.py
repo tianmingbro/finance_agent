@@ -22,7 +22,7 @@ from langchain_chroma import Chroma
 from src.loader.loader_facade import LoaderFacade        # 可选，这里未直接使用
 from src.splitter.splitter_factory import SplitterFactory
 from src.vectordb.vector_store_manager import VectorStoreManager
-from config import get_embedding_model_path, get_vector_size
+from src.config import get_embedding_model_path, get_vector_size
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

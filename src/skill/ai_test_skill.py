@@ -106,10 +106,15 @@ class EvalResourceManager:
         if not api_key:
             raise RuntimeError("未找到 DASHSCOPE_API_KEY，无法初始化评测模型")
         # 创建指向 DashScope 兼容接口的 GPTModel
+        # self._custom_model = GPTModel(
+        #     model=model_name,
+        #     api_key=api_key,
+        #     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        # )
         self._custom_model = GPTModel(
-            model=model_name,
-            api_key=api_key,
-            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            model="qwen2.5:7b",                          # Ollama 中的模型名
+            api_key="ollama",                            # 任意非空字符串
+            base_url="http://localhost:11434/v1",        # Ollama 的 OpenAI 兼容端点
         )
         self._loaded = True
         logger.info("DeepEval 评估资源就绪")

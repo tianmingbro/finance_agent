@@ -82,3 +82,17 @@ logs/
 htmlcov/
 .coverage
 coverage.xml
+# 评测报告
+reports/
+promptfoo_output.html
+promptfoo_results.json
+*.html
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# Promptfoo 输出与密钥
+reports/promptfoo/
+*.html
+.env

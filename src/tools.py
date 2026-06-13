@@ -20,7 +20,7 @@ def _get_eval_runner():
     global _eval_runner
     if _eval_runner is None:
         resource_mgr = EvalResourceManager()
-        resource_mgr.load_resources(model_name="qwen-plus")   # 修正：参数名 model_name，不是 model
+        resource_mgr.load_resources()   # 修正：参数名 model_name，不是 model
         _eval_runner = EvaluationRunner(resource_mgr)
     return _eval_runner
 

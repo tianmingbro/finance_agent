@@ -1,0 +1,26 @@
+# promptfooconfig.yaml
+description: "金融 RAG 多模型对比与安全红队测试"
+
+# ── 模型提供者 ─────────────────────────────
+providers:
+  - id: openai:qwen-plus
+    config:
+      apiBaseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      apiKey: DASHSCOPE_API_KEY
+  
+
+
+── 红队配置（按需运行） ─────────────────
+redteam:
+  plugins:
+    - injection
+    - jailbreak
+    - harmful
+    - rbac
+    - hijacking
+    - excessive-agency         
+  target:
+    id: openai:qwen-plus      # 扫描目标模型
+  numConcurrentRequests: 3  # 并发数
+  purpose: "评估金融法规助手的抗攻击能力"
+

@@ -1,0 +1,13 @@
+streamlit>=1.35
+pandas>=2.0
+pyyaml>=6.0
+plotly>=5.18
+deepeval>=1.0
+langchain>=1.2
+langchain-openai>=1.0
+langchain-community>=1.0
+langchain-chroma>=1.0
+langchain-text-splitters>=1.0
+sentence-transformers>=3.0
+redis>=5.0
+langchain-redis>=0.1

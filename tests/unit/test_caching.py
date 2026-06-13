@@ -1,4 +1,4 @@
-from config import get_embedding_model_path
+from src.config import get_embedding_model_path
 MODEL_PATH=get_embedding_model_path()
 import time
 import pytest

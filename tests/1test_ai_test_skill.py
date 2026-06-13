@@ -10,8 +10,6 @@ import re
 import sys
 import pytest
 
-# 将父目录加入 sys.path 以便导入 ai_test_skill
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # 导入待测组件
 from src.skill.ai_test_skill import (

@@ -192,8 +192,11 @@ def run_test_cases():
 # 在 integrated_graph.py 末尾增加验证函数
 def verify_retrieval_accuracy():
     """跨后端检索正确性验证"""
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    MODEL_PATH = os.path.join(BASE_DIR, "models", "all-MiniLM-L6-v2")
+    from pathlib import Path
+    # 获取当前脚本所在的绝对路径
+    BASE_DIR = Path(__file__).resolve().parent
+    # 使用 / 运算符直接拼接路径，清晰直观
+    MODEL_PATH = BASE_DIR / "models" / "all-MiniLM-L6-v2"
     from sentence_transformers import SentenceTransformer, util
 
     # 直接加载同一个 embedding 模型，与向量库使用的完全一致

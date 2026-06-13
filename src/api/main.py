@@ -4,6 +4,7 @@ Day45 最终版：全局异常处理 + 请求耗时日志 + 测试端点
 （已修正：ainvoke 调用、eval 端点、config 处理）
 """
 import asyncio
+from pathlib import Path
 import time
 import logging
 from fastapi import FastAPI, HTTPException, Request
@@ -11,10 +12,12 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import sys, os, json
+# 将项目根目录（finance_agent）加入 sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+from src.pipeline.eval_components import evaluate_generation, evaluate_planning, evaluate_retrieval
 
-from eval_components import evaluate_generation, evaluate_planning, evaluate_retrieval
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from contextlib import asynccontextmanager
 from src.agent.workflow import rag_agent_workflow
 from src.skill.ai_test_skill import EvaluationRunner, EvalResourceManager

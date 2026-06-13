@@ -12,7 +12,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 
 # 待实现的 VectorStoreManager
 from src.vectordb.vector_store_manager import VectorStoreManager
-from config import get_embedding_model_path
+from src.config import get_embedding_model_path
 
 EMBEDDING_MODEL =  get_embedding_model_path()
 
@@ -35,7 +35,7 @@ def is_pgvector_available(host="localhost", port=5433):
             from langchain_postgres import PGEngine, PGVectorStore
             from langchain_postgres.v2.indexes import DistanceStrategy
             from langchain_community.embeddings import HuggingFaceEmbeddings
-            from config import get_embedding_model_path
+            from src.config import get_embedding_model_path
             embeddings = HuggingFaceEmbeddings(
                 model_name=get_embedding_model_path(),
                 model_kwargs={"device": "cpu"},

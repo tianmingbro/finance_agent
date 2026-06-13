@@ -17,7 +17,7 @@ from src.retriever.hybrid_retriever import HybridRetriever, create_bm25_retrieve
 from langchain_chroma import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 import os
-from config import get_embedding_model_path
+from src.config import get_embedding_model_path
 modelname = get_embedding_model_path()
 # 全局单例，避免每次调用都重新加载模型和向量库
 _hybrid_retriever = None

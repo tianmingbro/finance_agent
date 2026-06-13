@@ -1,0 +1,50 @@
+description: "金融 RAG 多模型对比与安全红队测试"
+
+providers:
+  - id: openai:chat:qwen-plus
+    config:
+      apiKeyEnvar: DASHSCOPE_API_KEY
+      apiBaseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
+  - id: deepseek:deepseek-chat
+    config:
+      apiKeyEnvar: DEEPSEEK_API_KEY
+  - id: "http://localhost:8000/rag/query"
+    config:
+      method: "POST"
+      headers:
+        Content-Type: "application/json"
+      body:
+        query: "{{query}}"
+      responseParser: "json.answer"
+
+prompts:
+  - "{{query}}"
+
+tests:
+  - file://tests/promptfoo/promptfoo_tests.yaml
+
+# 修正红队配置
+redteam:
+  injectVar: query
+  plugins:
+    - financial:compliance-violation
+    - financial:misconduct
+    - financial:hallucination
+    - financial:data-leakage
+    - financial:sox-compliance
+    - hallucination
+    - indirect-prompt-injection
+    - system-prompt-override
+    - rag-poisoning
+    - rag-document-exfiltration
+    - rag-source-attribution
+    - excessive-agency
+    - rbac
+    - hijacking
+    - pii:direct
+  target:
+    id: openai:chat:qwen-plus
+  numConcurrentRequests: 4
+  purpose: "评估金融法规助手的抗攻击能力"
+
+outputPath: reports/promptfoo/promptfoo_output.html

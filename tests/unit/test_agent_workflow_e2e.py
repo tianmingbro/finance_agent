@@ -15,12 +15,18 @@ requires_api = pytest.mark.skipif(
 @requires_api
 async def test_agent_uses_workflow_tool():
     """Agent 使用工作流工具回答金融问题（本地工具，绕过 MCP 兼容性问题）"""
+    # model = ChatOpenAI(
+    #     model="qwen-plus",
+    #     temperature=0,
+    #     openai_api_key=os.environ["DASHSCOPE_API_KEY"],
+    #     openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
+    # )
     model = ChatOpenAI(
-        model="qwen-plus",
-        temperature=0,
-        openai_api_key=os.environ["DASHSCOPE_API_KEY"],
-        openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
-    )
+    model="qwen2.5:7b",                     # Ollama 中的模型名
+    temperature=0,
+    openai_api_key="ollama",                # 任意非空字符串
+    openai_api_base="http://localhost:11434/v1",
+)
     agent = create_agent(
         model=model,
         tools=[rag_workflow_query, evaluate_answer],

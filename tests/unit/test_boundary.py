@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 from langchain_core.documents import Document
 
 from src.loader.loader_facade import LoaderFacade
-from config import get_embedding_model_path
+from src.config import get_embedding_model_path
 MODEL_PATH=get_embedding_model_path()
 
 @pytest.fixture
