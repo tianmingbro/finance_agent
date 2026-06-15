@@ -1,3 +1,4 @@
+import logging
 import os
 import asyncio
 from fastapi import FastAPI
@@ -8,6 +9,7 @@ from langchain_openai import ChatOpenAI
 import json
 import uvicorn
 from src.agent.a2a.decorators import agent_task
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 warmup()
@@ -27,7 +29,7 @@ async def handle_task(req: TaskRequest):
     result_json = await search_finance_docs(query, top_k=4)
     docs = json.loads(result_json)["documents"]
     context = "\n".join([f"[{i+1}] {d['content']}" for i,d in enumerate(docs)])
-
+    logger.info("RAG Agent 收到任务 session=%s, context=%s", task.session_id, task.context if task.context else "无")
     # 生成
     # llm = ChatOpenAI(
     #     model="qwen-plus",
@@ -45,8 +47,12 @@ async def handle_task(req: TaskRequest):
     answer = llm.invoke(prompt).content
 
     task.artifacts = [{"answer": answer,
-                       "retrieval_context": [doc["content"] for doc in docs], 
                         "sources": [d["source"] for d in docs]}]
+    task.context = {
+    "query": query,
+    "answer": answer,
+    "sources": [d["source"] for d in docs]
+}
     task.status = "completed"
     return task
 

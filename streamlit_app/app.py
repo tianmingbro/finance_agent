@@ -21,6 +21,19 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.pipeline.eval_components import evaluate_planning, evaluate_retrieval, evaluate_generation
 
+ORCHESTRATOR_URL = "http://localhost:8100/a2a/task"
+
+def make_orchestrator_task(text: str, session_id: str = "streamlit", context: dict = None) -> dict:
+    task = {
+        "id": f"task-{int(time.time()*1000)}",
+        "session_id": session_id,
+        "messages": [{"role": "user", "parts": [{"text": text}]}],
+        "context": context or {},
+        "status": "created",
+        "artifacts": []
+    }
+    return {"task": task}
+
 st.config.set_option("theme.base", "light")
 page = st.sidebar.radio("导航", ["📊 评测中心", "🤖 多 Agent 协作"])
 if page == "📊 评测中心":
@@ -529,43 +542,62 @@ if page == "📊 评测中心":
 elif page == "🤖 多 Agent 协作":
     st.title("🤖 多 Agent 协作")
     st.markdown("通过主控 Agent 调度 RAG Agent 和评测 Agent，完成问答与质量评估。")
-    
-    # 输入区
-    user_query = st.text_input("请输入金融法规问题", placeholder="例如：资本充足率是多少？")
-    col1, col2 = st.columns(2)
-    with col1:
-        ask_button = st.button("💬 提问", use_container_width=True)
-    with col2:
-        eval_button = st.button("📏 评测上一回答", use_container_width=True, disabled="last_answer" not in st.session_state)
-    
+    # 初始化会话状态
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []      # 保存对话记录
     if "last_answer" not in st.session_state:
         st.session_state.last_answer = ""
+    if "last_sources" not in st.session_state:
+        st.session_state.last_sources = []
     if "last_query" not in st.session_state:
         st.session_state.last_query = ""
+    if "session_id" not in st.session_state:
+        import uuid
+        st.session_state.session_id = str(uuid.uuid4())
+
+    # 输入区
+    
+    user_query = st.text_input("请输入金融法规问题", placeholder="例如：资本充足率是多少？")
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        ask_button = st.button("💬 提问")
+    with col2:
+        # 评测按钮（只要存在上一次回答就可以点击）
+        eval_button = st.button("📏 评测刚才的回答", disabled=st.session_state.last_answer == "")
+
+    # if "last_answer" not in st.session_state:
+    #     st.session_state.last_answer = ""
+    # if "last_query" not in st.session_state:
+    #     st.session_state.last_query = ""
 
     orchestrator_url = "http://localhost:8100/a2a/task"
 
     if ask_button and user_query:
         with st.spinner("Orchestrator 正在调用 RAG Agent..."):
-            payload = {
-                "task": {
-                    "id": f"task-{int(time.time()*1000)}",
-                    "session_id": "streamlit",
-                    "messages": [{"role": "user", "parts": [{"text": user_query}]}],
-                    "status": "created",
-                    "artifacts": []
-                }
-            }
+            payload = make_orchestrator_task(user_query, session_id=st.session_state.session_id)
             try:
-                resp = requests.post(orchestrator_url, json=payload, timeout=60)
+                resp = requests.post(ORCHESTRATOR_URL, json=payload, timeout=60)
                 if resp.status_code == 200:
                     data = resp.json()
+                    st.write("DEBUG: 完整响应", data)   # 临时调试
                     if data["status"] == "completed":
-                        answer = data["artifacts"][0].get("answer", "无答案")
+                        answer = data["artifacts"][0].get("answer", "")
+                        # 从 context 或 artifacts 中提取 sources
+                        ctx = data.get("context", {})
+                        sources = ctx.get("sources", data["artifacts"][0].get("sources", []))
+                        # 保存到 session
                         st.session_state.last_answer = answer
+                        st.session_state.last_sources = sources
                         st.session_state.last_query = user_query
+                        # 记录对话
+                        st.session_state.chat_history.append({
+                            "role": "user", "content": user_query
+                        })
+                        st.session_state.chat_history.append({
+                            "role": "assistant", "content": answer, "sources": sources
+                        })
                         st.success("回答生成成功！")
-                        st.markdown(f"**回答：** {answer}")
+                        st.rerun()
                     else:
                         st.error(f"任务状态：{data['status']}")
                 else:
@@ -573,35 +605,42 @@ elif page == "🤖 多 Agent 协作":
             except Exception as e:
                 st.error(f"通信错误：{e}")
 
-    if eval_button and st.session_state.last_answer:
+    if eval_button:
         with st.spinner("Orchestrator 正在调用评测 Agent..."):
-            eval_query = f"评测 {st.session_state.last_query}|{st.session_state.last_answer}"
-            payload = {
-                "task": {
-                    "id": f"task-{int(time.time()*1000)}",
-                    "session_id": "streamlit",
-                    "messages": [{"role": "user", "parts": [{"text": eval_query}]}],
-                    "status": "created",
-                    "artifacts": []
-                }
-            }
+            # 发送“评测一下”指令，Orchestrator 会自动从 session 获取上下文
+            payload = make_orchestrator_task("评测一下", session_id=st.session_state.session_id)
             try:
-                resp = requests.post(orchestrator_url, json=payload, timeout=60)
+                resp = requests.post(ORCHESTRATOR_URL, json=payload, timeout=60)
                 if resp.status_code == 200:
                     data = resp.json()
                     if data["status"] == "completed":
-                        eval_data = data["artifacts"][0]
-                        st.metric("忠实度", f"{eval_data.get('faithfulness', 0):.2f}")
-                        st.metric("答案相关性", f"{eval_data.get('answer_relevancy', 0):.2f}")
+                        eval_info = data["artifacts"][0]
+                        # 记录评测结果
+                        st.session_state.chat_history.append({
+                            "role": "eval",
+                            "faithfulness": eval_info.get("faithfulness", 0),
+                            "answer_relevancy": eval_info.get("answer_relevancy", 0)
+                        })
+                        st.success("评测完成！")
                     else:
-                        st.error("评测失败")
+                        st.error(f"评测失败：{data.get('artifacts', [{}])[0].get('error', '未知错误')}")
                 else:
                     st.error(f"请求失败：{resp.status_code}")
             except Exception as e:
                 st.error(f"通信错误：{e}")
 
-    # 显示上一次回答（如果存在）
-    if st.session_state.last_answer:
-        with st.expander("📄 上一轮对话"):
-            st.write(f"**问题：** {st.session_state.last_query}")
-            st.write(f"**回答：** {st.session_state.last_answer}")
+    # 展示对话历史
+    for msg in st.session_state.chat_history:
+        if msg["role"] == "user":
+            st.chat_message("user").write(msg["content"])
+        elif msg["role"] == "assistant":
+            with st.chat_message("assistant"):
+                st.write(msg["content"])
+                if msg.get("sources"):
+                    with st.expander("📚 检索来源"):
+                        for src in msg["sources"]:
+                            st.write(f"- {src}")
+        elif msg["role"] == "eval":
+            with st.chat_message("assistant"):
+                st.metric("忠实度", f"{msg['faithfulness']:.2f}")
+                st.metric("答案相关性", f"{msg['answer_relevancy']:.2f}")

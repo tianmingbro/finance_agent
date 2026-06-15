@@ -49,6 +49,7 @@ class Task:
     messages: List[Message] = field(default_factory=list)
     artifacts: List[Any] = field(default_factory=list)
     status: str = "created"     # created / working / completed / failed
+    context: Dict[str, Any] = field(default_factory=dict)   # 🆕 跨 Agent 共享上下文
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -56,4 +57,5 @@ class Task:
             "messages": [m.to_dict() for m in self.messages],
             "artifacts": self.artifacts,
             "status": self.status,
+            "context":self.context,
         }

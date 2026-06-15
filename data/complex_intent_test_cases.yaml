@@ -1,0 +1,29 @@
+test_cases:
+  - intent: "qa_then_eval"
+    instruction: "帮我查一下存款保险最高限额，然后告诉我回答是否准确"
+    expected_subtasks:
+      - type: "rag"
+        query: "存款保险最高限额"
+      - type: "eval"
+        depends_on: [0]  # 依赖第一个子任务的结果
+    expected_final: "包含答案和评测分数"
+
+  - intent: "parallel_dual"
+    instruction: "资本充足率和购汇额度各是多少？"
+    expected_subtasks:
+      - type: "rag"
+        query: "资本充足率"
+      - type: "rag"
+        query: "购汇额度"
+    expected_final: "两个答案"
+
+  - intent: "conditional_retry"
+    instruction: "评测这个回答：核心一级资本充足率是8%。如果分数低于0.7就重新回答"
+    expected_subtasks:
+      - type: "eval"
+        query: "核心一级资本充足率"
+        answer: "核心一级资本充足率是8%"
+      - type: "rag"
+        query: "核心一级资本充足率"
+        condition: "eval.score < 0.7"
+    expected_final: "最终答案（可能重生成）"
