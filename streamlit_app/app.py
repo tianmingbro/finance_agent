@@ -15,6 +15,7 @@ import re
 import tempfile
 import subprocess
 from pathlib import Path
+import uuid
 
 # 确保能导入项目根目录下的模块
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -34,8 +35,46 @@ def make_orchestrator_task(text: str, session_id: str = "streamlit", context: di
     }
     return {"task": task}
 
+def parse_complex_intent_ui(text):
+    """前端简易意图解析，用于确定步骤显示"""
+    if ("评测" in text) and ("查" in text or "回答" in text or "提问" in text):
+        return "qa_then_eval"
+    elif "各是多少" in text or ("和" in text and "多少" in text):
+        return "parallel_dual"
+    elif "评测" in text and ("如果" in text or "若是" in text):
+        return "conditional_retry"
+    else:
+        return "simple"
+
+def get_steps_for_mode(mode):
+    if mode == "qa_then_eval":
+        return ["检索相关法规", "评估回答质量"]
+    elif mode == "parallel_dual":
+        return ["查询问题1", "查询问题2"]
+    elif mode == "conditional_retry":
+        return ["评估回答", "可能重新查询"]
+    else:
+        return ["生成回答"]
+
+def run_orchestrator_request(query_text, session_id):
+    payload = make_orchestrator_task(query_text, session_id)
+    try:
+        resp = requests.post(ORCHESTRATOR_URL, json=payload, timeout=90)
+        resp.raise_for_status()  # 非200状态会自动抛出异常
+        return resp.json()
+    except requests.exceptions.ConnectionError:
+        st.error("无法连接到 Orchestrator 服务，请确认已启动 agents/orchestrator.py")
+    except requests.exceptions.Timeout:
+        st.error("请求超时，请稍后重试或检查下游服务是否正常")
+    except requests.exceptions.HTTPError as e:
+        st.error(f"Orchestrator 返回错误: {e.response.status_code} - {e.response.text}")
+    except Exception as e:
+        st.error(f"请求异常: {e}")
+    return None
+        
 st.config.set_option("theme.base", "light")
 page = st.sidebar.radio("导航", ["📊 评测中心", "🤖 多 Agent 协作"])
+
 if page == "📊 评测中心":
 
     # ── 页面配置 ──────────────────────────────────────────
@@ -541,106 +580,109 @@ if page == "📊 评测中心":
 
 elif page == "🤖 多 Agent 协作":
     st.title("🤖 多 Agent 协作")
-    st.markdown("通过主控 Agent 调度 RAG Agent 和评测 Agent，完成问答与质量评估。")
-    # 初始化会话状态
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []      # 保存对话记录
-    if "last_answer" not in st.session_state:
-        st.session_state.last_answer = ""
-    if "last_sources" not in st.session_state:
-        st.session_state.last_sources = []
-    if "last_query" not in st.session_state:
-        st.session_state.last_query = ""
-    if "session_id" not in st.session_state:
-        import uuid
-        st.session_state.session_id = str(uuid.uuid4())
+    st.markdown("""
+    支持**复合指令**，例如：
+    - `查一下LPR最新报价并评估答案是否准确`
+    - `资本充足率和存款保险上限各是多少？`
+    """)
 
-    # 输入区
-    
-    user_query = st.text_input("请输入金融法规问题", placeholder="例如：资本充足率是多少？")
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        ask_button = st.button("💬 提问")
-    with col2:
-        # 评测按钮（只要存在上一次回答就可以点击）
-        eval_button = st.button("📏 评测刚才的回答", disabled=st.session_state.last_answer == "")
+    # 会话状态
+    if "a2a_session_id" not in st.session_state:
+        st.session_state.a2a_session_id = str(uuid.uuid4())
+    if "last_result" not in st.session_state:
+        st.session_state.last_result = None
+    if "debug" not in st.session_state:
+        st.session_state.debug = False
 
-    # if "last_answer" not in st.session_state:
-    #     st.session_state.last_answer = ""
-    # if "last_query" not in st.session_state:
-    #     st.session_state.last_query = ""
+    # 调试开关
+    st.sidebar.checkbox("显示调试信息", value=False, key="debug")
 
-    orchestrator_url = "http://localhost:8100/a2a/task"
+    with st.form("complex_query_form"):
+        user_input = st.text_area(
+            "输入指令",
+            placeholder="例如：查一下资本充足率并评估答案是否准确",
+            height=80
+        )
+        submitted = st.form_submit_button("🚀 执行")
 
-    if ask_button and user_query:
-        with st.spinner("Orchestrator 正在调用 RAG Agent..."):
-            payload = make_orchestrator_task(user_query, session_id=st.session_state.session_id)
-            try:
-                resp = requests.post(ORCHESTRATOR_URL, json=payload, timeout=60)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    st.write("DEBUG: 完整响应", data)   # 临时调试
-                    if data["status"] == "completed":
-                        answer = data["artifacts"][0].get("answer", "")
-                        # 从 context 或 artifacts 中提取 sources
-                        ctx = data.get("context", {})
-                        sources = ctx.get("sources", data["artifacts"][0].get("sources", []))
-                        # 保存到 session
-                        st.session_state.last_answer = answer
-                        st.session_state.last_sources = sources
-                        st.session_state.last_query = user_query
-                        # 记录对话
-                        st.session_state.chat_history.append({
-                            "role": "user", "content": user_query
-                        })
-                        st.session_state.chat_history.append({
-                            "role": "assistant", "content": answer, "sources": sources
-                        })
-                        st.success("回答生成成功！")
-                        st.rerun()
-                    else:
-                        st.error(f"任务状态：{data['status']}")
+    if submitted and user_input:
+        # 清理旧结果
+        st.session_state.last_result = None
+
+        # 创建步骤状态容器
+        with st.status("正在处理...", expanded=True) as status:
+            steps_text = ["检索相关法规", "评估回答质量"]  # 默认两步
+            if "各是多少" in user_input:
+                steps_text = ["查询问题1", "查询问题2"]
+            elif "评测" in user_input and ("如果" in user_input or "若是" in user_input):
+                steps_text = ["评估回答", "可能重新查询"]
+            elif "评测" in user_input:
+                steps_text = ["检索相关法规", "评估回答质量"]
+
+            # 显示步骤占位
+            step_icons = []
+            for step in steps_text:
+                col1, col2 = st.columns([0.1, 0.9])
+                with col1:
+                    icon = st.empty()
+                    icon.markdown("⏳")
+                with col2:
+                    st.write(f"**{step}**")
+                step_icons.append(icon)
+
+            # 调用 Orchestrator
+            result = run_orchestrator_request(user_input, st.session_state.a2a_session_id)
+
+            if result and result.get("status") in ("completed", "partial"):
+                # 成功：所有步骤打勾
+                for icon in step_icons:
+                    icon.markdown("✅")
+                status.update(label="处理完成", state="complete", expanded=False)
+                st.session_state.last_result = result
+            else:
+                # 失败：标记错误
+                for icon in step_icons:
+                    icon.markdown("❌")
+                status.update(label="处理失败", state="error", expanded=True)
+                if result is None:
+                    st.error("无法连接到 Orchestrator，请检查服务是否启动。")
                 else:
-                    st.error(f"请求失败：{resp.status_code}")
-            except Exception as e:
-                st.error(f"通信错误：{e}")
+                    err = result.get("artifacts", [{}])[0].get("error", "未知错误")
+                    st.error(f"Orchestrator 返回失败: {err}")
+                st.session_state.last_result = None
 
-    if eval_button:
-        with st.spinner("Orchestrator 正在调用评测 Agent..."):
-            # 发送“评测一下”指令，Orchestrator 会自动从 session 获取上下文
-            payload = make_orchestrator_task("评测一下", session_id=st.session_state.session_id)
-            try:
-                resp = requests.post(ORCHESTRATOR_URL, json=payload, timeout=60)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    if data["status"] == "completed":
-                        eval_info = data["artifacts"][0]
-                        # 记录评测结果
-                        st.session_state.chat_history.append({
-                            "role": "eval",
-                            "faithfulness": eval_info.get("faithfulness", 0),
-                            "answer_relevancy": eval_info.get("answer_relevancy", 0)
-                        })
-                        st.success("评测完成！")
-                    else:
-                        st.error(f"评测失败：{data.get('artifacts', [{}])[0].get('error', '未知错误')}")
-                else:
-                    st.error(f"请求失败：{resp.status_code}")
-            except Exception as e:
-                st.error(f"通信错误：{e}")
+    # 展示上一次结果
+    if st.session_state.last_result:
+        st.divider()
+        st.subheader("📋 执行结果")
+        result = st.session_state.last_result
+        artifacts = result.get("artifacts", [])
 
-    # 展示对话历史
-    for msg in st.session_state.chat_history:
-        if msg["role"] == "user":
-            st.chat_message("user").write(msg["content"])
-        elif msg["role"] == "assistant":
-            with st.chat_message("assistant"):
-                st.write(msg["content"])
-                if msg.get("sources"):
+        for artifact in artifacts:
+            if "faithfulness" in artifact or "answer_relevancy" in artifact:
+                # 优先识别评测指标卡片
+                col1, col2 = st.columns(2)
+                col1.metric("忠实度", f"{artifact.get('faithfulness', 0):.2f}")
+                col2.metric("答案相关性", f"{artifact.get('answer_relevancy', 0):.2f}")
+            elif "answer" in artifact:
+                # 纯答案展示
+                st.chat_message("assistant").write(artifact["answer"])
+                if "sources" in artifact:
                     with st.expander("📚 检索来源"):
-                        for src in msg["sources"]:
+                        for src in artifact["sources"]:
                             st.write(f"- {src}")
-        elif msg["role"] == "eval":
-            with st.chat_message("assistant"):
-                st.metric("忠实度", f"{msg['faithfulness']:.2f}")
-                st.metric("答案相关性", f"{msg['answer_relevancy']:.2f}")
+            elif "error" in artifact:
+                st.error(f"子任务失败: {artifact['error']}")
+            else:
+                # 其他未知格式
+                st.json(artifact)
+
+    # 调试面板
+    if st.session_state.debug and st.session_state.last_result:
+        with st.expander("🔧 调试信息"):
+            st.json(st.session_state.last_result)
+
+# if st.session_state.get("debug"):
+    # with st.expander("🔧 调试信息"):
+    #     st.json(st.session_state.get("last_payload", {}))
+    #     st.json(st.session_state.get("last_response", {}))
