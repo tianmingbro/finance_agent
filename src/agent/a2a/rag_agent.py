@@ -9,9 +9,12 @@ from langchain_openai import ChatOpenAI
 import json
 import uvicorn
 from src.agent.a2a.decorators import agent_task
+from prometheus_fastapi_instrumentator import Instrumentator
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+Instrumentator().instrument(app).expose(app)
 warmup()
 
 class TaskRequest(BaseModel):

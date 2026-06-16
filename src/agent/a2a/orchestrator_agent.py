@@ -7,8 +7,10 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from src.agent.a2a.a2a_types import Task, Message, TextPart, AgentCard, AgentSkill
 import uvicorn
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI()
+Instrumentator().instrument(app).expose(app)
 logger = logging.getLogger(__name__)
 
 RAG_AGENT_URL = "http://localhost:8101"

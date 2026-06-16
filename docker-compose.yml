@@ -1,0 +1,171 @@
+version: "3.9"
+
+services:
+  # ──────────────────────────────────────────────────
+  # Redis 缓存
+  # ──────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: redis-finance
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - a2a-network
+    volumes:
+      - redis_finance_data:/data
+
+  # ──────────────────────────────────────────────────
+  # RAG Agent
+  # ──────────────────────────────────────────────────
+  rag-agent:
+    build:
+      context: .
+      dockerfile: agents/Dockerfile.rag
+    container_name: rag-agent
+    restart: unless-stopped
+    ports:
+      - "8101:8101"
+    environment:
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+      - REDIS_URL=redis://redis-finance:6379
+      - VECTOR_STORE_BACKEND=chroma               # 或 pgvector
+      - PGVECTOR_CONNECTION_STRING=postgresql+psycopg3://pgvector:pgvector@pgvector:5432/ai_rag
+    depends_on:
+      redis-finance:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8101/.well-known/agent-card"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - chroma_data:/app/chroma_db                # 持久化 Chroma 向量数据
+      # - ./data/source_docs:/app/data/source_docs  # 如果需要挂载文档源
+    networks:
+      - a2a-network
+
+  # ──────────────────────────────────────────────────
+  # Eval Agent
+  # ──────────────────────────────────────────────────
+  eval-agent:
+    build:
+      context: .
+      dockerfile: agents/Dockerfile.eval
+    container_name: eval-agent
+    restart: unless-stopped
+    ports:
+      - "8102:8102"
+    environment:
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8102/.well-known/agent-card"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - a2a-network
+
+  # ──────────────────────────────────────────────────
+  # Orchestrator Agent
+  # ──────────────────────────────────────────────────
+  orchestrator:
+    build:
+      context: .
+      dockerfile: agents/Dockerfile.orch
+    container_name: orchestrator
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    environment:
+      - RAG_AGENT_URL=http://rag-agent:8101
+      - EVAL_AGENT_URL=http://eval-agent:8102
+      - REDIS_URL=redis://redis-finance:6379
+    depends_on:
+      rag-agent:
+        condition: service_healthy
+      eval-agent:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/.well-known/agent-card"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - a2a-network
+
+  # ──────────────────────────────────────────────────
+  # Prometheus 监控
+  # ──────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    networks:
+      - a2a-network
+
+  # ──────────────────────────────────────────────────
+  # Grafana 可视化
+  # ──────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./configs/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - a2a-network
+
+  # ──────────────────────────────────────────────────
+  # 预留：pgvector 生产级向量数据库（需要时取消注释）
+  # ──────────────────────────────────────────────────
+  # pgvector:
+  #   image: pgvector/pgvector:pg16
+  #   container_name: pgvector
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: pgvector
+  #     POSTGRES_PASSWORD: pgvector
+  #     POSTGRES_DB: ai_rag
+  #   ports:
+  #     - "5433:5432"
+  #   volumes:
+  #     - pgvector_data:/var/lib/postgresql/data
+  #   networks:
+  #     - a2a-network
+
+# ──────────────────────────────────────────────────
+# 网络与数据卷
+# ──────────────────────────────────────────────────
+networks:
+  a2a-network:
+    driver: bridge
+
+volumes:
+  redis_finance_data:
+  chroma_data:        # Chroma 向量库持久化
+  prometheus_data:
+  grafana_data:
+  # pgvector_data:     # pgvector 持久化（需要时取消注释）
