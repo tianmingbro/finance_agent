@@ -1,0 +1,42 @@
+docker run -d --name redis-cache-test -p 6379:6379 redis:latest
+
+docker run -d --name pgvector-test \
+  -e POSTGRES_USER=pgvector \
+  -e POSTGRES_PASSWORD=pgvector \
+  -e POSTGRES_DB=ai_rag \
+  -p 5433:5432 \
+  pgvector/pgvector:pg16
+
+# 启动 pgvector 容器
+docker start pgvector-test
+
+# 启动 redis 容器
+docker start redis-cache-test
+
+
+## 📊 评测管理界面 (Streamlit)
+
+我们提供了一个可视化的评测管理工具，方便上传评测集、执行 DeepEval 组件评估或 Promptfoo 多模型对比，并查看可视化报告。
+
+### 启动
+
+```bash
+pip install streamlit pyyaml pandas plotly
+streamlit run streamlit_app/app.py
+
+浏览器访问 http://localhost:8501。
+功能亮点
+
+    上传 .yaml 评测数据集，自动预览内容
+
+    选择 DeepEval（组件级指标）或 Promptfoo（多模型对比+HTML报告）
+
+    进度条实时反馈
+
+    彩色指标卡片与 Plotly 柱状图
+
+    支持下载 JSON/CSV 报告
+
+演示录屏
+
+30秒快速演示：上传评测集 → DeepEval 评估 → 查看结果

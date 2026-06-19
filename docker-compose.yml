@@ -1,12 +1,10 @@
-version: "3.9"
-
 services:
   # ──────────────────────────────────────────────────
   # Redis 缓存
   # ──────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: redis-finance
+    container_name: redis
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -16,26 +14,33 @@ services:
     networks:
       - a2a-network
     volumes:
-      - redis_finance_data:/data
+      - redis_data:/data
 
+  base:
+    build:
+      context: .
+      dockerfile: src/agent/Dockerfile.base
+    image: finance-agent-base:latest
+      
   # ──────────────────────────────────────────────────
   # RAG Agent
   # ──────────────────────────────────────────────────
   rag-agent:
     build:
       context: .
-      dockerfile: agents/Dockerfile.rag
+      dockerfile: src/agent/Dockerfile.rag
     container_name: rag-agent
     restart: unless-stopped
     ports:
       - "8101:8101"
     environment:
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
-      - REDIS_URL=redis://redis-finance:6379
+      - REDIS_URL=redis://redis:6379
       - VECTOR_STORE_BACKEND=chroma               # 或 pgvector
       - PGVECTOR_CONNECTION_STRING=postgresql+psycopg3://pgvector:pgvector@pgvector:5432/ai_rag
+      - EMBEDDING_MODEL_PATH=/app/models/text2vec-base-chinese
     depends_on:
-      redis-finance:
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8101/.well-known/agent-card"]
@@ -43,7 +48,8 @@ services:
       timeout: 10s
       retries: 3
     volumes:
-      - chroma_data:/app/chroma_db                # 持久化 Chroma 向量数据
+      - chroma_data:/app/chroma_db
+      - /opt/models/text2vec-base-chinese:/app/models/text2vec-base-chinese               # 持久化向量数据
       # - ./data/source_docs:/app/data/source_docs  # 如果需要挂载文档源
     networks:
       - a2a-network
@@ -54,13 +60,14 @@ services:
   eval-agent:
     build:
       context: .
-      dockerfile: agents/Dockerfile.eval
+      dockerfile: src/agent/Dockerfile.eval
     container_name: eval-agent
     restart: unless-stopped
     ports:
       - "8102:8102"
     environment:
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+      - UVLOOP_NO_UVLOOP=1
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8102/.well-known/agent-card"]
       interval: 30s
@@ -75,15 +82,17 @@ services:
   orchestrator:
     build:
       context: .
-      dockerfile: agents/Dockerfile.orch
+      dockerfile: src/agent/Dockerfile.orch
     container_name: orchestrator
     restart: unless-stopped
     ports:
       - "8100:8100"
+    volumes:
+    - ./src:/app/src   # 挂载源代码目录
     environment:
       - RAG_AGENT_URL=http://rag-agent:8101
       - EVAL_AGENT_URL=http://eval-agent:8102
-      - REDIS_URL=redis://redis-finance:6379
+      - REDIS_URL=redis://redis:6379
     depends_on:
       rag-agent:
         condition: service_healthy
@@ -97,6 +106,22 @@ services:
     networks:
       - a2a-network
 
+  streamlit:
+    build:
+      context: .
+      dockerfile: src/agent/Dockerfile.streamlit
+    container_name: streamlit
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - ORCHESTRATOR_URL=http://orchestrator:8100
+    volumes:
+    - ./streamlit_app/app.py:/app/streamlit_app/app.py
+    depends_on:
+      - orchestrator
+    networks:
+      - a2a-network
   # ──────────────────────────────────────────────────
   # Prometheus 监控
   # ──────────────────────────────────────────────────
@@ -164,7 +189,7 @@ networks:
     driver: bridge
 
 volumes:
-  redis_finance_data:
+  redis_data:
   chroma_data:        # Chroma 向量库持久化
   prometheus_data:
   grafana_data:

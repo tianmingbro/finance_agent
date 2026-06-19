@@ -34,18 +34,18 @@ async def handle_task(req: TaskRequest):
     context = "\n".join([f"[{i+1}] {d['content']}" for i,d in enumerate(docs)])
     logger.info("RAG Agent 收到任务 session=%s, context=%s", task.session_id, task.context if task.context else "无")
     # 生成
-    # llm = ChatOpenAI(
-    #     model="qwen-plus",
-    #     temperature=0,
-    #     openai_api_key=os.getenv("DASHSCOPE_API_KEY"),
-    #     openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
-    # )
     llm = ChatOpenAI(
-        model="qwen2.5:7b",                     # Ollama 中的模型名
+        model="qwen-plus",
         temperature=0,
-        openai_api_key="ollama",                # 任意非空字符串
-        openai_api_base="http://localhost:11434/v1",
-        )
+        openai_api_key=os.getenv("DASHSCOPE_API_KEY"),
+        openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
+    )
+    # llm = ChatOpenAI(
+    #     model="qwen2.5:7b",                     # Ollama 中的模型名
+    #     temperature=0,
+    #     openai_api_key="ollama",                # 任意非空字符串
+    #     openai_api_base="http://localhost:11434/v1",
+    #     )
     prompt = f"根据以下文档回答问题：\n{context}\n\n问题：{query}\n答案："
     answer = llm.invoke(prompt).content
 

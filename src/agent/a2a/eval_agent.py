@@ -49,7 +49,8 @@ async def handle_task(req: TaskRequest):
     runner = get_runner()
     def rag_callable(q):
         return {"input": query, "answer": answer, "context": retrieval_context}
-    report = runner.run(f"评测：{query}", rag_callable)
+    # report = runner.run(f"评测：{query}", rag_callable)
+    report = await runner.async_run(f"评测：{query}", rag_callable)
     faith = next((m.score for m in report.metrics if m.name=="faithfulness"), 0.0)
     rel = next((m.score for m in report.metrics if m.name=="answer_relevancy"), 0.0)
 

@@ -1,0 +1,7 @@
+FROM finance-agent-base:latest
+
+# 暴露 RAG Agent 端口
+EXPOSE 8101
+
+# 启动 RAG Agent
+CMD ["uvicorn", "src.agent.a2a.rag_agent:app", "--host", "0.0.0.0", "--port", "8101"]

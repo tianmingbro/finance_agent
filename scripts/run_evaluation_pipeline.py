@@ -50,16 +50,16 @@ MAX_CONCURRENT = 4                # 同时进行的评测数
 PER_CASE_TIMEOUT = 60             # 单个用例最大总时间（秒）
 
 # DeepEval 评判模型
-# EVAL_MODEL = GPTModel(
-#     model="qwen-plus",
-#     api_key=os.getenv("DASHSCOPE_API_KEY"),
-#     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-# )
 EVAL_MODEL = GPTModel(
-    model="qwen2.5:7b",
-    api_key="ollama",
-    base_url="http://localhost:11434/v1"
+    model="qwen-plus",
+    api_key=os.getenv("DASHSCOPE_API_KEY"),
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
+# EVAL_MODEL = GPTModel(
+#     model="qwen2.5:7b",
+#     api_key="ollama",
+#     base_url="http://localhost:11434/v1"
+# )
 
 # -------------------- 工具函数 --------------------
 def load_eval_dataset(path: str) -> List[Dict[str, Any]]:

@@ -1,0 +1,8 @@
+FROM finance-agent-base:latest
+# 安装 eval-agent 特有的依赖
+RUN pip install --no-cache-dir deepeval
+ENV DISABLE_UVLOOP=1
+
+EXPOSE 8102
+
+CMD ["uvicorn", "src.agent.a2a.eval_agent:app", "--host", "0.0.0.0", "--port", "8102"]

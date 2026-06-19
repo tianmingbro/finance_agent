@@ -106,16 +106,16 @@ class EvalResourceManager:
         if not api_key:
             raise RuntimeError("未找到 DASHSCOPE_API_KEY，无法初始化评测模型")
         # 创建指向 DashScope 兼容接口的 GPTModel
-        # self._custom_model = GPTModel(
-        #     model=model_name,
-        #     api_key=api_key,
-        #     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-        # )
         self._custom_model = GPTModel(
-            model="qwen2.5:7b",                          # Ollama 中的模型名
-            api_key="ollama",                            # 任意非空字符串
-            base_url="http://localhost:11434/v1",        # Ollama 的 OpenAI 兼容端点
+            model=model_name,
+            api_key=api_key,
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
         )
+        # self._custom_model = GPTModel(
+        #     model="qwen2.5:7b",                          # Ollama 中的模型名
+        #     api_key="ollama",                            # 任意非空字符串
+        #     base_url="http://localhost:11434/v1",        # Ollama 的 OpenAI 兼容端点
+        # )
         self._loaded = True
         logger.info("DeepEval 评估资源就绪")
 
@@ -263,7 +263,14 @@ class EvaluationRunner:
             summary=summary,
             improvements=improvements,
         )
-
+    async def async_run(self, user_input: str,
+                        rag_skill: Callable[[str], dict]) -> EvalReport:
+        """
+        异步安全版本的 run：将同步评测逻辑放入线程池执行，
+        避免在 uvloop 中触发 nest_asyncio 冲突。
+        """
+        return await asyncio.to_thread(self.run, user_input, rag_skill)
+        
     def _generate_summary(self, metrics: List[MetricResult]) -> tuple:
         avg = sum(m.score for m in metrics) / len(metrics) if metrics else 0
         failed = [m for m in metrics if not m.success]

@@ -94,20 +94,20 @@ async def generate_answer_task(
     context = _build_context(documents)
     logger.debug("生成上下文长度: %d 字符", len(context))
 
-    # llm = ChatOpenAI(
-    #     model="qwen-plus",
-    #     temperature=0,
-    #     openai_api_key=os.getenv("DASHSCOPE_API_KEY"),qwen
-    #     openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
-    #     request_timeout=GENERATE_TIMEOUT,
-    # )
     llm = ChatOpenAI(
-            model="qwen2.5:7b",                           # 1. 改为你本地 Ollama 中的模型名
-            temperature=0,
-            openai_api_key="ollama",                      # 2. 任意非空字符串（Ollama 不校验）
-            openai_api_base="http://localhost:11434/v1",  # 3. Ollama 的 OpenAI 兼容端点
-            request_timeout=GENERATE_TIMEOUT,             # 保留你原来的超时设置
-        )
+        model="qwen-plus",
+        temperature=0,
+        openai_api_key=os.getenv("DASHSCOPE_API_KEY"),
+        openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        request_timeout=GENERATE_TIMEOUT,
+    )
+    # llm = ChatOpenAI(
+    #         model="qwen2.5:7b",                           # 1. 改为你本地 Ollama 中的模型名
+    #         temperature=0,
+    #         openai_api_key="ollama",                      # 2. 任意非空字符串（Ollama 不校验）
+    #         openai_api_base="http://localhost:11434/v1",  # 3. Ollama 的 OpenAI 兼容端点
+    #         request_timeout=GENERATE_TIMEOUT,             # 保留你原来的超时设置
+    #     )
     prompt = (
         "你是一个金融法规专家，严格遵守以下规则：\n"
         "1. 仅基于提供的文档回答问题，不得编造任何法规条款或数据。\n"

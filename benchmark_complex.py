@@ -18,7 +18,7 @@ COMPLEX_INSTRUCTION = "查一下资本充足率并评估答案是否准确"
 # 简单任务指令（仅问答）
 SIMPLE_INSTRUCTION = "资本充足率是多少？"
 
-CONCURRENT_USERS = 10
+CONCURRENT_USERS = 5
 
 def make_payload(instruction, session_id):
     return {

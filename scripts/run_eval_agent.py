@@ -35,17 +35,17 @@ from src.agent.agent import build_agent
 
 os.environ["VECTOR_STORE_BACKEND"] = "pgvector"  # 根据实际情况调整
 
-# 全局评测模型
-# EVAL_MODEL = GPTModel(
-#     model="qwen-plus",
-#     api_key=os.getenv("DASHSCOPE_API_KEY"),
-#     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
-# )
+全局评测模型
 EVAL_MODEL = GPTModel(
-    model="qwen2.5:7b",
-    api_key="ollama",
-    base_url="http://localhost:11434/v1"
+    model="qwen-plus",
+    api_key=os.getenv("DASHSCOPE_API_KEY"),
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 )
+# EVAL_MODEL = GPTModel(
+#     model="qwen2.5:7b",
+#     api_key="ollama",
+#     base_url="http://localhost:11434/v1"
+# )
 
 # -------------------- 配置 --------------------
 EVAL_DATASET_PATH = "data/eval_dataset_v2.yaml"

@@ -110,18 +110,18 @@ def test_end_to_end_doc_to_answer(temp_doc_dir, chroma_dir, monkeypatch):
     from langchain_core.prompts import ChatPromptTemplate
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
-    # llm = ChatOpenAI(
-    #     model="qwen-plus",
-    #     temperature=0,
-    #     openai_api_key=os.environ["DASHSCOPE_API_KEY"],
-    #     openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
-    # )
     llm = ChatOpenAI(
-    model="qwen2.5:7b",                     # Ollama 中的模型名
-    temperature=0,
-    openai_api_key="ollama",                # 任意非空字符串
-    openai_api_base="http://localhost:11434/v1",
+        model="qwen-plus",
+        temperature=0,
+        openai_api_key=os.environ["DASHSCOPE_API_KEY"],
+        openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
     )
+    # llm = ChatOpenAI(
+    # model="qwen2.5:7b",                     # Ollama 中的模型名
+    # temperature=0,
+    # openai_api_key="ollama",                # 任意非空字符串
+    # openai_api_base="http://localhost:11434/v1",
+    # )
     prompt = ChatPromptTemplate.from_messages([
         ("system", "你是金融法规助手。根据以下上下文回答问题：\n{context}"),
         ("human", "{input}")

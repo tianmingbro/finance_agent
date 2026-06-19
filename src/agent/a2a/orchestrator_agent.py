@@ -1,4 +1,5 @@
 import time
+import os
 import logging
 import asyncio
 import httpx
@@ -13,9 +14,10 @@ app = FastAPI()
 Instrumentator().instrument(app).expose(app)
 logger = logging.getLogger(__name__)
 
-RAG_AGENT_URL = "http://localhost:8101"
-EVAL_AGENT_URL = "http://localhost:8102"
-
+RAG_AGENT_URL = os.getenv("RAG_AGENT_URL", "http://localhost:8101")
+EVAL_AGENT_URL = os.getenv("EVAL_AGENT_URL", "http://localhost:8102")
+ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://localhost:8100")
+logger.info(f"RAG_AGENT_URL={RAG_AGENT_URL}, EVAL_AGENT_URL={EVAL_AGENT_URL}")
 # ---- 会话存储 (与 Day51 相同) ----
 session_store: dict = {}
 SESSION_TTL = 300
@@ -319,7 +321,7 @@ async def handle_simple_task(task: Task) -> Task:
             task = Task(**resp.json())
         logger.info("调用 %s 成功，耗时 %.3fs", target_url, time.perf_counter()-start)
     except Exception as e:
-        logger.error("调用 %s 失败: %s", target_url, e)
+        logger.error("子任务调用失败: %s", e, exc_info=True)  # 增加 exc_info=True
         task.status = "failed"
         task.artifacts = [{"error": f"服务不可用: {str(e)}"}]
         return task
@@ -339,7 +341,7 @@ def agent_card():
     return AgentCard(
         name="orchestrator",
         description="主控代理，支持复合意图解析与子任务编排",
-        url="http://localhost:8100",
+        url=ORCHESTRATOR_URL,
         skills=[AgentSkill(id="dispatch", name="任务分发")],
         capabilities={"streaming": False}
     ).to_dict()

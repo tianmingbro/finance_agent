@@ -227,18 +227,18 @@ class ResourceManager:
                 self._retriever = vector_retriever
             # LLM (Qwen-plus, 使用 OpenAI 兼容模式)
             logger.info("延迟加载 正在连接 Qwen-plus 模型...")
-            # self._llm = ChatOpenAI(
-            #     model="qwen-plus",
-            #     temperature=0,
-            #     openai_api_key=QWEN_API_KEY,
-            #     openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
-            # )
             self._llm = ChatOpenAI(
-                model="qwen2.5:7b",                     # Ollama 中的模型名
+                model="qwen-plus",
                 temperature=0,
-                openai_api_key="ollama",                # 任意非空字符串
-                openai_api_base="http://localhost:11434/v1",
+                openai_api_key=QWEN_API_KEY,
+                openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"
             )
+            # self._llm = ChatOpenAI(
+            #     model="qwen2.5:7b",                     # Ollama 中的模型名
+            #     temperature=0,
+            #     openai_api_key="ollama",                # 任意非空字符串
+            #     openai_api_base="http://localhost:11434/v1",
+            # )
 
              # ── 缓存层初始化（由 DISABLE_CACHE 控制） ──
             if os.getenv("DISABLE_CACHE") != "1":

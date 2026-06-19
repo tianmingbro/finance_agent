@@ -16,11 +16,16 @@ import tempfile
 import subprocess
 from pathlib import Path
 import uuid
+import sys, os
+import time
+import asyncio
+
 
 # 确保能导入项目根目录下的模块
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.pipeline.eval_components import evaluate_planning, evaluate_retrieval, evaluate_generation
+from src.agent.a2a.orchestrator_agent import handle_task, Task, Message, TextPart, TaskRequest
 
 ORCHESTRATOR_URL = "http://localhost:8100/a2a/task"
 
@@ -71,7 +76,28 @@ def run_orchestrator_request(query_text, session_id):
     except Exception as e:
         st.error(f"请求异常: {e}")
     return None
-        
+
+def execute_complex_task_direct(user_text, session_id):
+    """直接调用 Orchestrator 的核心处理函数，避免网络问题"""
+    task = Task(
+        id=f"streamlit-{int(time.time()*1000)}",
+        session_id=session_id,
+        messages=[Message(role="user", parts=[TextPart(text=user_text)])],
+        context={}
+    )
+    req = TaskRequest(task=task)
+    try:
+        # 在新的事件循环中执行异步函数
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result_task = loop.run_until_complete(handle_task(req))
+        loop.close()
+        return result_task.__dict__  # 转成字典返回，与原接口兼容
+    except Exception as e:
+        # 捕获内部异常，便于调试
+        import traceback
+        st.error(f"执行错误: {traceback.format_exc()}")
+        return None        
 st.config.set_option("theme.base", "light")
 page = st.sidebar.radio("导航", ["📊 评测中心", "🤖 多 Agent 协作"])
 
@@ -631,7 +657,8 @@ elif page == "🤖 多 Agent 协作":
                 step_icons.append(icon)
 
             # 调用 Orchestrator
-            result = run_orchestrator_request(user_input, st.session_state.a2a_session_id)
+            # result = run_orchestrator_request(user_input, st.session_state.a2a_session_id)
+            result = execute_complex_task_direct(user_input, st.session_state.a2a_session_id)
 
             if result and result.get("status") in ("completed", "partial"):
                 # 成功：所有步骤打勾

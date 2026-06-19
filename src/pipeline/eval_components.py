@@ -26,13 +26,13 @@ logger = logging.getLogger(__name__)
 # ═══════════════════════════════════════════
 class CustomQwenLLM(DeepEvalBaseLLM):
     def __init__(self):
-        # self._model = ChatOpenAI(
-        #     model="qwen-max",
-        #     temperature=0,
-        #     openai_api_key=os.getenv("DASHSCOPE_API_KEY"),
-        #     openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
-        # )
-        self._model= ChatOpenAI(model="qwen2.5:7b",temperature=0, base_url="http://localhost:11434/v1", api_key="ollama")
+        self._model = ChatOpenAI(
+            model="qwen-max",
+            temperature=0,
+            openai_api_key=os.getenv("DASHSCOPE_API_KEY"),
+            openai_api_base="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        )
+        # self._model= ChatOpenAI(model="qwen2.5:7b",temperature=0, base_url="http://localhost:11434/v1", api_key="ollama")
 
     def load_model(self):
         return self._model

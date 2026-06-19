@@ -1,0 +1,4 @@
+FROM finance-agent-base:latest
+EXPOSE 8100
+
+CMD ["uvicorn", "src.agent.a2a.orchestrator_agent:app", "--host", "0.0.0.0", "--port", "8100"]
